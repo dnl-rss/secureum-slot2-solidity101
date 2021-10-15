@@ -1,6 +1,6 @@
-Markdown notes for the Secureum security bootcamp, week 2, [solidity-101](https://secureum.substack.com/p/solidity-101)
+> Markdown formatted notes with example solidity code for the Secureum security bootcamp, slot 2, topic: [solidity-101](https://secureum.substack.com/p/solidity-101)
 
-### 1. Solidity 101
+## 1. Solidity 101
 
 Soldity is a high-level language for implementing smart contracts on Ethereum and other EVM blockchains. It was founded in 2014 by Gavin Wood and developed by Christian Reitwiessner, Alex Beregszazi, and others
 
@@ -12,7 +12,7 @@ Solidity was influenced by C++ (OOP & Syntax), Python (modifiers, multiple inher
 
 Solidity is statically typed, supports inheritance, libraries, and complex user-defined types. It is a fully-featured high level language.
 
-### Chapters
+### Sub-Chapters
 
 1. [Contract Layout](./01_layout.md)
 2. [Typing](./02_types.md)

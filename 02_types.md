@@ -1,13 +1,13 @@
-## Static Typing
+## 35. Static Typing
 
 Solidity is a statically typed language, meaning that the type of each variable must be specified at compile-time. Other examples include C, C++, Java, Rust, Go, and Scala.
 In contrast, dynamically typed languages only require types on runtime values.
 
-## Value and Reference Types
+## 36. Value and Reference Types
 
-Solidity has two categories of types `value` types and `reference` types.  
+Solidity has two categories of types: `value` types and `reference` types.  
 
-### Value Types
+### 37. Value Types
 
 `value` types are called so because variables of these types will always be passed by value (they are copied when used as function arguments or in assignments).
 
@@ -26,7 +26,7 @@ Solidity has two categories of types `value` types and `reference` types.
 | `enum` | | |
 | `function` | | |
 
-### Reference Types
+### 38. Reference Types
 
 `reference` types assign a pointer to a value in memory. They can be accessed and modified through multiple names, yet reference the same underlying variable.
 
@@ -38,7 +38,7 @@ Solidity has two categories of types `value` types and `reference` types.
 | `struct` | custom grouping of other variables | |
 | `mapping` | key-value pairs | key may be any value type |
 
-## Default Values
+## 39. Default Values
 
 A declared variable will have an initial default value whose byte representation is all zeros. This is typically the "zero state" of whatever the type is.
 
@@ -51,12 +51,12 @@ A declared variable will have an initial default value whose byte representation
 | `string` or `bytes` | `""` |
 | `enum` | first member |
 
-## Scoping
+## 40. Scoping
 
 Scoping in solidity follows the widespread scoping rules of C99
 
 1. Variables are visible from the point right after declaration until the closure of the smallest bracket set `{}` that contains that declaration. An exeception to this rule includes variables declared in the initialization part of a for-loop, which are only visible until the end of the for-loop
-2. Varibles that are parameter-like (function parameters, modifier parameters, catch parameters, ...) are visible inside the code block that follows -- the body of the function or modifier or catch blocks
+2. Variables that are parameter-like (function parameters, modifier parameters, catch parameters, ...) are visible inside the code block that follows -- the body of the function or modifier or catch blocks
 3. Variables and other items declared outside of a code block are visible even before they were declared. This means you can use state variables and call functions before they are declared in code.
 
 ```solidity
@@ -79,24 +79,33 @@ function scopingDemo(uint param1) {
 // parameter1 and local_variable are no longer visible
 ```
 
-## Type operations
 
-### Boolean
+## 41. Boolean Type
 
+Declared with `bool` keyowrd. Possible values are constrants `true` and `false`
+
+Operations on booleans:
 - `!`: logical negation
 - `&&`: logical conjunction
 - `||`: logical disjunction
 - `==`: equality
 - `!=`: inequality
 
-### Integers
+The operators || and && apply the common short-circuiting rules. This means that in the expression f(x) || g(y), if f(x) evaluates to true, g(y) will not be evaluated even if it may have side-effects.
 
+TODO: ^explain
+
+### 42. Integer Types
+
+Signed and unsigned integers of various sizes. Keywords `uint8` to `uint256` in steps of 8 (unsigned of 8 up to 256 bits) and int8 to int256. uint and int are aliases for uint256 and int256, respectively.
+
+Operators on integers:
 - `<=`, `<`, `==`, `!=`, `>=`, `>`: comparisons, evaluate to `bool`
 - `&`, `|`, `^`, `~`: bit operators
 - `<<`, `>>`: shift operators
 - `+`, `-`, `*`, `/`, `%`, **: arithmatic operators
 
-Todo: bitwise exclusive or, bitwise negation, left shift, right shift, unary -
+Todo: explain bitwise exclusive or, bitwise negation, left shift, right shift, unary -
 
 Integers are restricted to the range of their declared byte sized, which ranges from 8 to 256 in increments of 8 bytes.
 
@@ -110,9 +119,15 @@ Integers are restricted to the range of their declared byte sized, which ranges 
 
 TODO: table for uint
 
+### 43. Check and Unchecked Arithmetic
+
 Arithmetic on integers is performed in "checked" mode by default since `v0.8.0`. This integrates Open Zepplin's [SafeMath](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/math/SafeMath.sol) standard into arithmatic operations and will revert transactions that cause integer values to overflow or underflow. The "unchecked" mode can be used via `unchecked{ ... }.`
 
-### Address
+### 44. Fixed Point Types
+
+Fixed point numbers using keywords `fixed` / `ufixed` are not fully supported by Solidity yet. They can be declared, but cannot be assigned to or from. There are fixed-point libraries that are widely used for this such as DSMath, PRBMath, ABDKMath64x64 etc.
+
+### 45. Address Types
 
 The address type comes in two flavors:
 1. `address`: holds a 20-byte value for an Ethereum address
@@ -122,7 +137,7 @@ You can only send Ether to an `address payable`, but `address` can be converted 
 
 - `<=`, `<`, `==`, `!=`, `>=`, `>`: comparisons, evaluate to `bool`
 
-> Members of address types
+### 46. Members of address types
 
 | member | return type | description |
 | ------ | ---- | ----------- |
@@ -135,7 +150,9 @@ You can only send Ether to an `address payable`, but `address` can be converted 
 | `address.delegatecall(bytes memory)` | `(bool, bytes memory)` | <ul><li>issues low-level `DELEGATECALL` with given payload</li><li>forwards all available gas or a specified amount</li><li>returns `false` on failure (revert with `require()`) </li></ul> |
 | `address.staticcall(bytes memory)` | `(bool, bytes memory)` | <ul><li>issues low-level `STATICCALL` with given payload</li><li>forwards all available gas or a specified amount</li><li>returns `false` on failure (revert with `require()`) </li></ul> |
 
-### Send Ether via Transfer, Send, and Call
+### 47, 48 Send Ether via Transfer, Send, and Call
+
+> Significant alteration from the secureum substack blog post contained in this section...
 
 The are three methods available to send Ether within a contract: `transfer()`, `send()`, and `call{value:}()`.
 
