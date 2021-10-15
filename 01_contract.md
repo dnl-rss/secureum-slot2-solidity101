@@ -1,173 +1,8 @@
-### 4. Layout of a solidity file
-
-A solidity source file can contain an arbitrary number of pragma directions, import directives, and struct/enum/contract definitions. Best practices is to declare in this order: state variables, events, modifiers, constructor, and functions.
-
-### 5. SPDX License Identifier
-
->Solidity files should start with a comment indicating the license. The compiler includes the supplied string in bytecode metadata.
-
-```solidity
-// SPDX-License-Identifier:MIT
-```
-### 6. Pragmas
-
-The `pragma` keyword enables certain compiler features or checks. This directive is local to a source file, and does not apply to imports.
-
-> There are two types of pragmas:
-
-1. Version Pragma:
-  - Compiler Version
-  - ABI Coder Version
-2. Experimental Pragma:
-  - SMT Checker
-
-#### 7. Version Pragmas
-
-The version `pragma` does not change the solidity compiler, nor does it enable or disable features of the compiler. It instructs the compiler to check whether its version matches the one required by the pragma, or throw an error.
-
-> This statement requires that the file be compiled with a specific version:
-
-```solidity
-pragma solidity x.y.z;
-```
-
-The latest compiler versions are in the `0.8.z` range. A different `y` in `x.y.z` indicates a breaking change in the compiler version, whereas a different `z` indicates bug fixes.
-
-> A carrot prefix indicates that the file must be compiled with *at least* version `x.y.z`, until the next `y` version:
-
-```solidity
-pragma solidity ^x.y.z;
-```
-
-> Complex pragmas combine multiple versions:
-
-```solidity
-pragma solidity >=0.8.0<0.8.3;
-```
-
-#### 8. ABI Coder pragmas
-
-The `abicoder` pragma indicates the choice between two implementations of the ABI encoder and decoder
-
-> Either
-
-```solidity
-pragma abicoder v1;
-```
-
-> or
-
-```solidity
-pragma abicoder v2;
-```
-
-The new `abicoder v2` is enabled by default. It can encode and decode arbitrarilty nested arrays and structs, although this may produce suboptimal code and is not as robustly tested as the v1 encoder.
-
-An `abicoder v2` contract can interact freely with `abicoder v1` or `v2` contracts.
-
-An `abicoder v1` contract will throw an error if it attempts to decode types only supported by the new compiler. Upgrading the abicoder version will resolve the issue.
-
-This `pragma` applies to all code in the file, regardless of where the code ends up. A contract compiled with abicoder v1 can still contain code using the new encoder by inheriting from another contract. This is okay as long as the new types are used internally and not in external fucntion signatures.
-
-#### 9. Experimental pragmas
-
-This `pragma` enables experimental compiler features that are not robustly tested and not yet enabled by default.
-
-> The only experimental pragma at the time of writing is that of a Satisfiability Modulo Theories (SMT) checker:
-
-```solidity
-pragma experimental SMTChecker;
-```
-
-`SMTChecker` performs additional safety checks which are obtained by querying an SMT solver, and provide examples where the checks are violated:
-- Satisfies all require and assert statements
-- Arithmetic underflow and overflow
-- Division by zero
-- Trivial condition and unreachable
-- Popping an empty array
-- Out of bounds index access
-- Insufficient funds for transfer
-
-### 10. Import statements
-
-Import statements help to modularize code and work similarly to JavaScript
-
-```Solidity
-import filename;
-```
-
-### 11. Comments
-
-Code comments improve readability and maintainability by providing in-line documentation of what contracts, functions , variables, expressions, control, and data flow are expected to do in the implementation.
-
-> Both single line comments (//) and multi-line comments (/*...*/) are supported
-
-```Solidity
-// a single line comment
-
-/*
-A
-multi-
-line
-comment
-*/
-```
-
-### 12. Natspec Comments
-
-Ethereum Natural Language Speficication Format (NatSpec) comments generate JSON format metadata for developers and end users. All public interfaces should be fully annotated
-
-> Both single line NatSpec comments (///) and multi-line comments (/**...*/) are supported, though only single line comments are shown below:
-
-```solidity
-// SPDX-License-Identifier: GPL-3.0
-pragma solidity >=0.8.2 < 0.9.0;
-
-/// @title A simulator for trees
-/// @author Larry A. Gardner
-/// @notice You can use this contract for only the most basic simulation
-/// @dev All function calls are currently implemented without side effects
-/// @custom:experimental This is an experimental contract.
-contract Tree {
-    /// @notice Calculate tree age in years, rounded up, for live trees
-    /// @dev The Alexandr N. Tetearing algorithm could increase precision
-    /// @param rings The number of rings from dendrochronological sample
-    /// @return Age in years, rounded up for partial years
-    function age(uint256 rings) external virtual pure returns (uint256) {
-        return rings + 1;
-    }
-
-    /// @notice Returns the amount of leaves the tree has.
-    /// @dev Returns only a fixed number.
-    function leaves() external virtual pure returns(uint256) {
-        return 2;
-    }
-}
-
-contract Plant {
-    function leaves() external virtual pure returns(uint256) {
-        return 3;
-    }
-}
-
-contract KumquatTree is Tree, Plant {
-    function age(uint256 rings) external override pure returns (uint256) {
-        return rings + 2;
-    }
-
-    /// Return the amount of leaves that this specific kind of tree has
-    /// @inheritdoc Tree
-    function leaves() external override(Tree, Plant) pure returns(uint256) {
-        return 3;
-    }
-}
-```
-
-### 13. Contracts
+## 13. Contracts
 
 Contracts are similar to classes in OOP languages: they contain persistent data in state variables, functions that can modifiy these variables, and contracts can inherit from other contracts.
 
-### 14. Declarations Within Contracts
+## 14. Declarations Within Contracts
 
 Contracts contain declarations of:
 - state variables
@@ -178,11 +13,11 @@ Contracts contain declarations of:
 - struct types
 - enum types
 
-#### 15. State Variables
+### 15. State Variables
 
 State Variables are permanently stored in contract storage and can be accessed by all functions of a contract.
 
-##### 16. State Visibility Specifiers
+#### 16. State Visibility Specifiers
 
 Visibility of state variables is either:
 1. `public`: accessible internally or via messages; A getter function is generated.
@@ -191,7 +26,7 @@ Visibility of state variables is either:
 
 > Note: Marking a variable as private does not prevent others from reading the data stored on the EVM. It only prevents other contracts from programatically reading it.
 
-##### 17. State Mutability
+#### 17. State Mutability
 
 Variables are mutable by default, but immutable types `constant` or `immutable` are often more gas efficient than mutable types.
 
@@ -207,7 +42,7 @@ Variables are mutable by default, but immutable types `constant` or `immutable` 
 
 The compiler does not reserve a storage slot for these variables.
 
-##### 18. Gas Cost of State Variables
+#### 18. Gas Cost of State Variables
 
 Compared to regular state variables, the gas cost of `constant` and `immutable` variables are much lower.
 
@@ -217,15 +52,15 @@ Immutable variables are evaluated once at construction time and their value is c
 
 The only supported types for immutable variables are strings and value types. Only strings for constants.
 
-#### 19. Functions
+### 19. Functions
 
 Functions are executable units of code typically defined inside a contract, but can also be defined outside of one. They have different levels of visibility toward other contracts.
 
-##### 20. Function parameters
+#### 20. Function parameters
 
 Function `parameters` are declared the same way as variables, and the name of unused parameters can be omitted. Function parameters can be used as any other local variable, and can be reassigned.
 
-##### 21. Function return variables
+#### 21. Function return variables
 
 Function `return` variables are declared with the same syntax after the `returns` keyword. Names of return variables can be omitted. Return variables can be used as any other local variable. They are initialized with their default value and retain that value until they are reassigned. A function with return values must receive those in a return statement and assignment.
 
@@ -245,7 +80,7 @@ function addTwoNumbers(uint256 param1, uint256 param2) returns (uint256 returnVa
 }
 ```
 
-##### 22. Function modifiers
+#### 22. Function modifiers
 
 Function `modifiers` can be used to control the behavior of a function prior to execution.  
 
@@ -275,7 +110,7 @@ If the modifier prevents execution of the function body, the default values of r
 
 The underscore `_;` symbol can appear in a modifier multiple times, each occurrence is replaced with the function body.
 
-##### 23. Function visibility
+#### 23. Function visibility
 
 The `visibility` of a contract is either:
 1. `public`: included in contract interface and can be called internally or via messages
@@ -285,7 +120,7 @@ The `visibility` of a contract is either:
 
 Free functions always have `internal` visibility, their code is included in all contracts that call them, similar to internal library functions
 
-##### 24. Function mutability
+#### 24. Function mutability
 
 The `mutability` of a function can restrict read and write access to the contract state. Modify restrictions are enforced at the EVM level via `STATICCALL` opcodes, but read restrictions are only enforced by the solidity compiler. Additionally, functions are restricted by default in their ability to send Ether; such functions must be marked `payable`.
 
@@ -315,7 +150,7 @@ Operations considered to read contract state include:
 - Calling any function not marked pure
 - Using inline assembly that contains certain opcodes
 
-##### 25. Function overloading
+#### 25. Function overloading
 
 A contract can have multiple functions of the same name but with different parameter types, this is called "overloading." Overloaded functions are selected by matching the function declarations in the current scope to the arguments supplied in the function call. Return parameters are not taken into account.
 
@@ -333,17 +168,17 @@ function getSum(uint a, uint b, uint c) public pure returns (uint) {
 }
 ```
 
-##### 26. Free Functions
+#### 26. Free Functions
 
 Functions that are defined outside of contracts are called *free functions* and always have implicit internal visibility. Their code is include in all contracts that call them, similar to an internal library function.
 
-#### 27. Events
+### 27. Events
 
 `Events` are an abstraction of the EVM's logging functionality. Emitting events causes the arguments to be stored in the transaction's log -- a special data structure in the blockchain. These logs are associated with the contract `address` and are accessible on the blockchain as long as the block is accessible.
 
 The `Log` and its `event` data is not accessible from within contracts (even those that create them). Applications can subscribe and listen to the events through the RPC interface of an Ethereum client.
 
-#### 28. Indexed event parameters
+### 28. Indexed event parameters
 
 The optional attribute `indexed` for up two three event parameters adds them to a special data structure known as "topics" instead of the data part of the log.
 
@@ -376,7 +211,7 @@ contract Ownable {
 }
 ```
 
-#### 29. Emit
+### 29. Emit
 
 Events are emmitted using `emit` followed by the name of the event and the arguments
 
@@ -396,11 +231,11 @@ contract EtherBank {
 }
 ```
 
-#### 30. Struct Types
+### 30. Struct Types
 
 `struct` types group several variables into a custom data structure. Struct members are access using a period `.`,
 
-#### 31. Eunm Types
+### 31. Enum Types
 
 `enum` types create custom types with a finit set of constant values to improve readability. They may take a minimum of 1 member and a maximum of 256 members. They can be explicitly converted to/from integers. Options are represented by unsigned integer values starting from 0. Default value is the first member
 
@@ -452,7 +287,7 @@ contract FruitShopping {
 }
 ```
 
-#### 32. Constructor function
+### 32. Constructor function
 
 Contract creation can be triggered by an external transaction or from within a solidity contract. When a contract is created, its `constructor()` function is executed. A constructor is optional, and only one is allowed.
 
@@ -460,7 +295,7 @@ After the constructor has executed, the final code of the contract is stored on 
 
 The deployed code does not include the constrcutor code or internal functions that are only called from the constructor.
 
-#### 33. Receive Function
+### 33. Receive Function
 
 A contract may have at most one `receive()` function, which is declared without the function keyword. This function takes no arguments, does not return anything, must have `external` visibility, and is `payable`.
 
@@ -470,7 +305,7 @@ receive() external payable {}
 
 `receive()` executes on calls to a contract with empty calldata. This function is executed on plain Ether transfers via `.send()` or `.transfer()`. Both `.send()` and `.transfer()` only forward `2300 gas` to `receive()`, allowing `receive()` to update the `address.balance` and leaving little room for other operations in the function body.
 
-#### 35. Fallback function
+### 35. Fallback function
 
 A contract can have at most one `fallback()` function, which is declared without the function keyword. This function must have external visibility. It may or may not be payable.
 
@@ -480,4 +315,4 @@ fallback() external payable {}
 
 `fallback()` is executed on calls to a contract containing calldata, but none of the other functions match the given function signature. It is also called when there is no `msg.data` and `receive()` is not declared.
 
-Like `receive()`,`fallback()` may only rely on 2300 gas available from `.send()` or `.transfer()`.
+Like `receive()`,`fallback()` may only rely on 2300 gas available from `send()` or `transfer()`.

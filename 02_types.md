@@ -1,6 +1,7 @@
 ## 35. Static Typing
 
 Solidity is a statically typed language, meaning that the type of each variable must be specified at compile-time. Other examples include C, C++, Java, Rust, Go, and Scala.
+
 In contrast, dynamically typed languages only require types on runtime values.
 
 ## 36. Value and Reference Types
@@ -171,6 +172,53 @@ Both `transfer()` and `send()` forward limited amounts of gas. This is just enou
 While `transfer()` and `send()` were favored in the past because they are resistant to *reentrancy attacks*, `call{value:}()` is now the favored method and the developer must implement other safeguards against reentrancy.
 
 TODO: Why was this recommendation made? What shortcomings of tranfer() and send() surfaced the change?
+
+> This implmentation of a smart contract bank can send ether by either `send()`, `transfer()`, or `call{value:}("")`. Note that this contract is vulnerable to reentracy via the call method.
+
+```solidity
+//SPDX-License-Identifier: MIT
+pragma solidity ^0.6.0;
+
+import "hardhat/console.sol";
+
+contract Bank {
+
+  mapping( address => uint256 ) balances;
+
+  constructor() public {}
+
+  function deposit() public payable {
+      balances[msg.sender] += msg.value;
+  }
+
+  function withdraw_via_transfer(uint256 amount) public {
+      // forwards 2300 gas, not adjustable
+      require(balances[msg.sender] >= amount, "Invalid withdraw request");
+      payable(msg.sender).transfer(amount);
+      balances[msg.sender] -= amount;
+  }
+
+  function withdraw_via_send(uint256 amount) public {
+      // forwards 2300 gas, not adjustable
+      // returns success condition
+      // fails if stack depth is at 1024
+      require(balances[msg.sender] >= amount, "Invalid withdraw request");
+      bool sent = payable(msg.sender).send(amount);
+      require(sent, "Failed to send Ether");
+      balances[msg.sender] -= amount;
+  }
+
+  function withdraw_via_call(uint256 amount) public {
+      // forwards all available gas
+      // returns success condition and data
+      require(balances[msg.sender] >= amount, "Invalid withdraw request");
+      // (bool sent, bytes memory _data) = msg.sender.call.value(amount}("");
+      (bool sent, bytes memory _data) = msg.sender.call{value: amount}("");
+      require(sent, "Failed to send Ether");
+      balances[msg.sender] -= amount;
+  }
+}
+```
 
 ### 49. Call, Delegatecall, and STATICCALL
 

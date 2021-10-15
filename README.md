@@ -4,6 +4,18 @@
 
 Soldity is a high-level language for implementing smart contracts on Ethereum and other EVM blockchains. It was founded in 2014 by Gavin Wood and developed by Christian Reitwiessner, Alex Beregszazi, and others
 
+> Hello World in Solidity
+
+```solidity
+// SPDX-License-Identifier: MIT
+// compiler version must be greater than or equal to 0.8.3 and less than 0.9.0
+pragma solidity ^0.8.3;
+
+contract HelloWorld {
+    string public greet = "Hello World!";
+}
+```
+
 ### 2. Solidity influences
 
 Solidity was influenced by C++ (OOP & Syntax), Python (modifiers, multiple inheritance, C3 linearization, & super keywords), and JavaScript (function level scoping & `var` keyword). Javascript influences have been reduced since `v0.4.0`
