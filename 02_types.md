@@ -536,11 +536,11 @@ contract Example {
 
 ### 61. Array literals
 
-An array literal is a comma separated list of one or more expresions, enclosed in square brackets.
+An array literal is a *comma separated list* of one or more expressions, *enclosed in square brackets*: `[1,2,3]`.
 
-1. It is always a statically sized memory array whose length is the number of expressions
-2. The base type of the array is the type of the first expression on the list such that all other expressions can be implicitly converted to it. Otherwise, a `TypeError` is thrown.
-3. Fixed size memory arrays cannot be assigned to dynamically sized memory arrays
+1. It is always a *statically-sized memory array* whose length is the number of expressions
+2. The base type of the array is the *type of the first expression* of the list. All other expressions must be *implicitly converted* to it. Otherwise, a `TypeError` is thrown.
+3. *Fixed size memory arrays* **cannot** be assigned to *dynamically-sized memory arrays*
 
 ```Solidity
 //SPDX-License-Identifier: MIT
@@ -567,11 +567,17 @@ contract Example {
 }
 ```
 
-### 62. Gas cost of push and pop
+### 62. Array gas costs
 
-Increasing the length of a storage array by calling `push()` has constant gas cost because storage is zero initialized, while decreasing the length by `pop()` depends on the size of the element being removed.
+Storage arrays have operations `push()` and `pop()`.
 
-If the element is an array, it can be very costly, because it includes explicitly clearing the removed elements.
+*Extending* the array with `push()` has *constant gas cost* because storage is zero initialized.
+
+*Shortening* the array by `pop()` have *variable gas cost*, depending on the size of the element being removed.
+
+If the removed element is an array, `pop()` can be very costly, because it includes explicitly clearing all the removed elements.
+
+> Pushing an empty element has constant gas cost. Popping an element have variable gas cost, depending on the size of the element:  
 
 ```solidity
 //SPDX-License-Identifier: MIT
@@ -599,19 +605,27 @@ contract Example {
 
 ### 63. Array Slices
 
-Array slices are a view on a contiguous portion of an array. They are written as `x[start:end]`, where start and end are expression resulting in `uint256` type (or implicitly convertivle to it). The first element of the slice is `x[start]` and the last element is `x[end-1]`
+Array slices are a *view* on a *contiguous portion of an array*.
 
-1. If `start > end` or `end > array.length`, an exception is thrown
-2. Both start and end are optional. start defaults to 0 and end defaults to the length of the array.
-3. Array slices do not have any Members
-4. They are implicitly convertible to arrays of their underlying type and support index access. Index access is not absolute in the underlying array, but relative to the start of the slice.
-5. Array slices do not have a type name which means no variable can have an array slices as type and the only exist in intermediate expressions
-6. Array slices are only implemented for calldata Arrays
-7. Array slices are useful to ABI decode secondary data passed in function parameters
+They are written as `x[start:end]`. The first element of the returned slice is `x[start]` and the last element is `x[end-1]`.
 
-> Slices are only implemented in solidity for `calldata`. This is useful for parsing `calldata`, for example the function selector is always the first four bytes.
+Start and end must be expressions resulting in `uint256` type, or implicitly convertible to it.
+
+1. An *exception* is thrown if `start > end` or `end > array.length`
+2. Both `start` and `end` are *optional*
+    - `start` defaults to `0`
+    - `end` defaults to `array.length`
+3. Slices have **no members**
+4. Slices are *implicitly convertible* to arrays of their underlying type
+5. Slices support *index access*, which is *relative to the slice* not to the parent array
+5. Slices have **no type name** which means *no variable can be of slice type* (they only exist in intermediate expressions)
+6. Slices are only implemented for `calldata` arrays
+7. Slices are useful to *ABI decode* secondary data passed in function parameters
+
+> Slices are only implemented in solidity for `calldata`. This is useful for parsing `calldata`. The function selector is always the first four bytes of `calldata`.
 
 ```solidity
+//SPDX-License-Identifier: MIT
 pragma solidity ^0.6.0;
 
 contract Proxy {
@@ -638,61 +652,90 @@ contract Proxy {
 
 ### 64. Struct Types
 
-Structs help define new aggregate types by combining other value/reference types into one unit. Struct types can be used inside mappings and arrays. They may contain mappings and arrays. It is not possible for a struct to contain a member of its own type.
+`struct` types define new *aggregate types* combining other value/reference types into one data structure.
+
+Mappings and arrays may contain structs, and vice versa.
+
+A `struct` to may **not** contain a member of its own type.
+
+> TODO: ^ Does that mean that a `struct` cannot contain any other `struct`? Or only that it may not contain itself?
 
 ### 65. Mapping types
 
-Mapping define key-value pairs and are declared using the syntax `mapping(_KeyType => _ValueType) _VariableName`.
+`mapping` types define key-value pairs.
 
-1. The `_KeyType` can be any built-in value type, bytes, string, or any contract or enum type. OTher user defined or complex types (mappings, structs, or arrays) are not allowed. `_ValueType` can be any type (including mappings, structs, or arrays).
-2. Key data is not stored in a mapping, only its keccack256 hash is used to look up the value.
-3. Mappings do not have a length or a concept of a key or value being set
-4. They can only have a data location of storage and thus allowed for state variables, storage reference types in functions, or parameters for library Functions
-5. They cannot be used as parameters or return parameters of contract functions that are publicly visible. These restructions are also true for arrays and structs that contain mappings.
-6. You cannot iterate over mappings, i.e. you cannot enumerate their keys. It is possible, though, tho implement a data structure on top of them and iterate over that.
+They are declared as such: `mapping(_KeyType => _ValueType) _VariableName;`.
 
-### 66. Operators Involving LValues
+1. Allowed types for `_KeyType` and `_ValueType`:
+    - `_KeyType` can be *any built-in value type*: `bytes`, `string`, or any `contract` or `enum` type
+    - `_KeyType` may **not** be any other user defined or complex type (`mapping`, `struct`, or arrays)
+    - `_ValueType` can be *any type* (including `mapping`, `struct`, or arrays).
+2. `mapping` does **not store** *key data* (the `keccak256` key hash is used to loop up the value)
+3. `mapping` has **no length**, or a concept of a key or value being set
+4. `mapping` data can only be located in `storage`, and thus allowed for *state variables*, *storage reference* types in functions, or *parameters for library* functions
+5. `mapping` **cannot** be used as a `public` *function parameter* or *return variable*. This restriction is also true for arrays and structs containing mappings.
+6. `mapping` is **not iterable**. However, one can implement a data structure on top of `mapping` and iterate over that.
+
+### 66. Shorthand Operators
 
 An "LValue" is a variable, or something that can be assigned to
 
-1. `a += e` is equivalent to `a = a + e`. The operators `-=`, `*=`, `%=`, `|=`, `&=`, `^=` act similarly.
-2. `a++` and `a--` are equivalent to `a+=1/a-=1` but the expression itself still has the previous value of `a`.
-3. In contrast, `--a` and `++a` have the same effect on `a`, but return the value after the change.
+- `a += e` is equivalent to `a = a + e`.
+- `-=`, `*=`, `%=`, `|=`, `&=`, and `^=` act similarly as above.
+- `a++` is equivalent to `a += 1`, but the expression itself still has the *previous value* of `a` (likewise for `a--`)
+- `++a` have the same effect as above, but returns the *value after the change*.
 
-### 67. delete
+> TODO: elaborate on `a++` and `++a` notes
 
-1. `delete a` assignes the initial value for the type to `a`
-2. For integers it is equivalent to `a=0`
-3. FOr arrays, it assigns a dynamic array of length zero or a static array of the same length with all elements set to their initial value
-4. `delete a[x]` deletes the item at index `x` of the array and leaves all other elements and the length of the array untouched
-5. for `struct`, it assigns a strcut with all members resets
-6. delete has no effect on mappings. If you delete a strcut, it will reset all members that are not mappings and also recurs into the members unless they are mappings
-7. For mappings, individual keys and what they map to can be deleted. If `a` is a mapping, then `delete a[x]` will delete the value stored at `x`.
+### 67. `delete`
+
+The command `delete a` assigns the *initial zero value* for the type to `a`
+
+1. For an `int`, it is equivalent to `a = 0`
+2. For a *dynamic array*, it assigns a dynamic array of *length zero*
+3. For a *static array*, it assigns a static array of the same length with *all elements set to their initial value*
+4. For an *array element*, `delete a[x]` deletes only the element at index `x` (other elements are unchanged)
+5. For a `struct`, it assigns a `struct` with all members reset
+6. For a `mapping`, `delete` has **no effect**  
+7. For a `struct` containing a `mapping`, `delete` will reset all members that are not `mapping` and also recurs into the members, unless they are `mapping`
+8. For a `mapping` *key*,`delete a[x]` will delete the value stored at `x`
 
 ### 68. Implicit Conversions
 
 An implicit type conversion is automatically applied by the compiler in some cases when making assignments, passing arguments, or applying operations.
 
-Implicit conversion between value-types is possible if it makes sense semantically and no information is lost. For example, `uint8` is convertible to `uint16`, and `int128` to `int256`, but `int8` is not convertible to `uint256` because `uint256` cannot hold values such as `-1`.
+*Implicit conversion* between value-types is possible if it *makes sense semantically* and *no information is lost*.
+
+For example:
+- `uint8` is convertible to `uint16`,
+- `int128` is convertible to `int256`,
+- `int8` is **not** convertible to `uint256` (`uint256` cannot hold negative values)
 
 ### 69. Explicit Conversion
 
-IF the compiler does not allow implicit conversion but a developer is reasonably confident that a conversion will work, an explicit type conversion is possible. This may result in unexpected behavior and bypasses some security features of the complier (e.g. `int` to `uint`)
+*Explicit conversions* may be applied by a developer even when the compiler does not allow *implicit conversion*.
 
-1. If an integer is explicitly converted to a smaller type, higher order bits are cut off
-2. If an integer is explicitly converted to a larger type, it is padded on the left (the higher order end)
-3. Fixed size bytes types explicitly converted to a smaller type will cut of the bytes to the right
-4. Fixed size bytes types explicitly converted to a larger type will pad bytes to the right.
+The developer should have reasonable confidence that the conversion will be valid, as this bypasses some security features of the complier (e.g. `int` to `uint`) and may result in unexpected behavior.
 
-### 70. Conversion between literals and elementary types
+For example:
+1. `int` converted to a *smaller* type, cuts off higher order bits
+2. `int` converted to a *larger* type, pads on the left (the higher order end)
+3. `bytesN` converted to a *smaller* type, cuts off the bytes to the right
+4. `bytesN` converted to a *larger* type, pads bytes to the right.
 
-1. Decimal and hexadecimal number literals can be implicitly converted to any integer type that is large enough to represent it without trucation
-2. Decimal number literals cannot be implicitly converted to fixed size byte arrays
-3. Hexadecimal number literals can be, but only if the number of hex digits exactly fits the size of the bytes type. As an exception both decimal and hexadecimal literals which have a value of zero can be converted to any fixed size bytes type
-4. String literals and hex string literals can be implicitly converted to fixed size byte arrays, if their number of characters matches the size of the bytes type
+### 70. Conversion of Literals
 
-### 71. A literal number can take a suffix of wei, gwei, or ether to specify a sub-denomination of Ether
+1. *Decimal/Hex number literals* can be *implicitly converted* to any `int` type, provided it is large enough to represent the number without truncation
+2. *Decimal number literals* **cannot** be *implicitly converted* to `bytesN`
+3. *Hex number literals* can be *implicitly converted* to `bytesN`, but only if the number of hex digits exactly fits the size of the bytes type
+4. *Decimal/hex literals* can be *implicitly converted* to any `bytesN` size, if their value is zero can be converted (exception to previous)
+5. *String/hex literals* can be *implicitly converted* to `bytesN`, if the number of characters matches the size of the bytes array
 
+### 71. Ether Units
+
+A literal number can take a suffix of `wei`, `gwei`, or `ether` to specify a *sub-denomination of Ether*, effectively multiplying the value by the appropriate power of 10.
+
+> 1 ether == 1e9 qwei == 1e18 wei
 ```solidity
 uint amount1 = 1 ether;
 uint amount2 = 1e9 gwei;
@@ -700,11 +743,11 @@ uint amount3 = 1e18 wei;
 assert( amount1 == amount2 & amount2 == amount3 );
 ```
 
-### 72. Suffixes like seconds, minutes, hourse, days, and weeks after literal numbers can be used to specify units of time where seconds are the base unit
+### 72. Time Units
 
-Be careful when applying these calendar calculations, because not every year equals 365 days (leap years) and not every day has 24 hours (leap seconds).
+Suffixes like `seconds`, `minutes`, `hours`, `days`, and `weeks` after literal numbers specify *units of time* where `seconds` are the base unit
 
-The suffixes cannot be applied directly to variables but can be applied by multiplication.
+Be careful when applying these calendar calculations, because not every year has 365 days (leap years) and not every day has 24 hours (leap seconds).
 
 ```solidity
 assert( 1 == 1 seconds );
@@ -714,9 +757,24 @@ assert( 1 days == 24 hours );
 assert( 1 weeks == 7 days );
 ```
 
+> The suffixes cannot be applied directly to variables but can be applied by multiplication.
+
+```solidity
+// daysAfter is a regular uint variable
+uint daysAfter = 3;
+
+// this fails
+// uint secondsAfter = daysAfter days;
+
+// this works
+uint secondsAfter = daysAfter * 1 days;
+```
+
 ### 73. Block and Transaction Properties
 
-> members of block object
+Solidity supports `block`, `msg`, and `tx` objects to retrieve relevant information about the state of the blockchain and transaction.
+
+> Members of `block` object
 
 | member | return type | description |
 | ------ | ------- | --------- |
@@ -728,7 +786,7 @@ assert( 1 weeks == 7 days );
 | `block.timestamp` | `uint` | current block timestamp as seconds since unix epoch |
 | `blockhash(uint blockNumber)` | `bytes32` | hash of given block (only 256 most recent) |
 
- > Members of msg object
+ > Members of `msg` object
 
 | member | return type | description |
 | ------ | ------- | --------- |
@@ -737,7 +795,7 @@ assert( 1 weeks == 7 days );
 | `msg.sig` | `bytes4` | first four bytes of calldata (function identifier) |
 | `msg.value` | `uint` | number of wei sent with message |
 
-> Members of tx object
+> Members of `tx` object
 
 | member | return type | description |
 | ------ | ------- | --------- |
@@ -745,17 +803,21 @@ assert( 1 weeks == 7 days );
 | `tx.origin` | `address` | sender of the transaction (full call chain) |
 | `gasleft()` | `uint256` | remaining gas in transaction |
 
-### 74. The values of all members of `msg` can change for every external function call, including library functions.
+### 74. `msg` can change
 
-### 75. Avoid randomness via block timestamps or hashes
+The values of all members of `msg` (`msg.sender`,`msg.value`, etc) can change for every external function call, including library functions.
 
-Do not rely on `block.timestamp` or `blockhash` as a source of randomness. Both can be influenced by miners. The current block timestamp must be strictly larger than the timestamp of the last block, but the only guarantee is that is will be somewhere between the timestamps of two consecutive blocks in the canonical chain
+### 75. Randomness Source
 
-### 76. Non-archival clients only store 256 most recent blocks
+**Do not rely** on `block.timestamp` or `blockhash` as a *source of randomness*. Both can be influenced by miners. The current block timestamp must be strictly larger than the timestamp of the last block, but the only guarantee is that is will be somewhere between the timestamps of two consecutive blocks in the canonical chain
 
-This is for scalability reasons. Thus, solidity can only access `blockhash(uint blockNumber)` for the 256 most recent blocks. Otherwise it returns zero.
+### 76. Blockhash
 
-### 77. ABI encoding and decoding functions
+`blockhash(uint blockNumber)` returns the hash of the specified block. However, for scalability reasons solidity can only access this data for the 256 most recent blocks, excluding the current block. Otherwise `blockhash()` returns `0`.
+
+### 77. ABI Encoding/Decoding
+
+> Solidity supports multiple functions for encoding and decoding data with respect to the contract ABI.
 
 | member | return type | description |
 | `abi.decode(bytes memory encodedData, (...))` | `(...)` | decodes given data, while the types are given in parentheses as second argument |
@@ -768,15 +830,15 @@ This is for scalability reasons. Thus, solidity can only access `blockhash(uint 
 
 > Solidity functions useful for handling errors
 
-| function | on failure |
-| -------- | ---------- |
-| `assert(bool condition)` | throws panic error, reverts state changes - used for internal errors |
-| `require(bool condition)` | reverts if condition not met - used for input errors or external components |
-| `require(bool condition, string memory message)` | also provides an error message |
-| `revert()` | aborts execution and reverts state changes |
-| `revert(string memory reason)` | also provides an explanatory string |
+| function | on failure | used for |
+| -------- | ---------- | -------- |
+| `assert(bool condition)` | panics if condition not met, reverts state changes | internal errors |
+| `require(bool condition)` | reverts if condition not met | input errors or external components |
+| `require(bool condition, string memory message)` | also provides an error message | |
+| `revert()` | aborts execution and reverts state changes | force revert without a condition |
+| `revert(string memory reason)` | also provides an explanatory string | |
 
-### 79. Mathematical and cryptographic functions
+### 79. Math/Crypto functions
 
 > Several solidity functions useful for cryptographic applications
 
@@ -787,11 +849,21 @@ This is for scalability reasons. Thus, solidity can only access `blockhash(uint 
 | `keccak256(bytes memory)` | `bytes32` | computes keccak256 hash of input |
 | `sha256(bytes memory)` | `bytes32` | computes SHA256 hash of input |
 | `ripemd160(bytes memory)` | `bytes20` | computes RIPEMD-160 hash of input |
-| `ecrecover(bytes32 hash, uint8 v, bytes32 r, bytes32 s)` | `address` | recovers address associated with the public key from elliptic curve signature or return zero on error. does not return `address payable`. |
+| `ecrecover(bytes32 hash, uint8 v, bytes32 r, bytes32 s)` | `address` | recovers `address` associated with the public key from elliptic curve signature or return zero on error. does not return `address payable`. |
 
-### 80. Ecrecover
+> TODO: Elaborate on this section
 
-When using `ecrecover`, a valid signature can be turned into a different valid signature without requiring knowledge of the corresponding private key. This is usually not a problem unless you require signature to be unique or use them to identify items. OpenZepplin has an ECDSA helper library to wrap `ecrecover` without this issue.
+### 80. Ecrecover Malleability (non-uniqueness)
+
+A *valid signature* can be turned into a *different valid signature* requiring **no knowledge** of the corresponding *private key*.
+
+This can result in a vulnerability to *replay attacks*, in which the second signature may bypass some contract logic.
+
+This usually not a problem unless you require signature to be unique or use them to identify items.
+
+The reason for this malleability is that the `s` value can be in either the higher order range or the lower order range.
+
+OpenZepplin has an ECDSA helper library to wrap `ecrecover` without this issue by forcing `s` to be in the lower order range.
 
 ### 81. Contract related objects
 
