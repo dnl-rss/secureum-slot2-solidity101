@@ -73,7 +73,7 @@ Programming style affect readability and maintainability, both of which affect s
     - mixedCase
     - Capitalized_Words_With_Underscores
     - single_trailing_underscore_
-2. Avoid these single letter names. They are hard to distingish from numerals `1` or `0`:
+2. Avoid these single letter names. They are hard to distinguish from numerals `1` or `0`:
     - `l` lowercase letter "el"
     - `O` uppercase letter "oh"
     - `I` uppercase letter "eye."
