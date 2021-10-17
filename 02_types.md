@@ -865,38 +865,46 @@ The reason for this malleability is that the `s` value can be in either the high
 
 OpenZepplin has an ECDSA helper library to wrap `ecrecover` without this issue by forcing `s` to be in the lower order range.
 
-### 81. Contract related objects
+### 81. Context related
 
 1. `this` is the current contract, explicitly convertible to `address`
 2. `selfdestruct(address payable recipient)` destroys the current contract, sending funds to `recipient` and ending execution
 
-### 82. `selfdestruct()` has some peculiarities
+### 82. selfdestruct
 
-The receiving contract's `receive()` function is not executed and the contract is only destroyed at the end of the transaction. A revert may undo the destruction.
+`selfdestruct()` has some pecularities:
+- The receiving contract's `receive()` function is **not** executed
+- The contract is only destroyed at the *end of the transaction*. A revert may undo the destruction.
 
-### 83. Type information
+### 83. Contract Type
 
-The expression `type(X)` can be used to retrieve information about the type `X`, where `X` can either be a contract or an integer type.
+The expression `type(X)` can be used to retrieve information about the type `X`, where `X` can either be a contract or an interface type.
 
-#### Contract type information
+For a `contract` type `C` the following is available:
+1. `type(C).name`: the contract *name*
+2. `type(C).creationCode`: `memory bytes` array containing the contract *creation bytecode*.
+    - Used for inline assembly to build custom creation routines, especially using the `CREATE2` opcode.
+    - This property cannot be accessed in the contract itself or any derived contract.
+    - It causes the bytecode to be included in the bytecode of the call site and thus circular references like above are not possible.
+3. `type(C).runtimeCode`: `memory bytes` array containing contract *runtime bytecode*.
+    - This code is usually deployed by the `constructor()` of `C`.
+    - If the `constructor()` of `C` uses inline assembly, this might be different from the actual deployed bytecode.
+    - Libraries modify their runtime bytecode at the time of deployment to guard against regular calls.
+    - Same restrictions as with `creationCode` also apply here.
 
-For a contract type `C` the following is available:
-1. `type(C).name`: the name of the contract
-2. `type(C).creationCode`: memory byte array containing the creation bytecode of the contract. Used for inline assembly to build custom creation routines, especially using the `CREATE2` opcode. This property cannot be accessed in the contract itself or any derived contract. It causes the bytecode to be included in the bytecode of the call site and thus circular references like that are not possible.
-3. `type(C).runtimeCode`: memory byte array containing runtime bytecode of the contract. This code is usually deployed by the constructor of C. If the constructor of C uses inline assembly, this might be different from the actual deployed bytecode. Note that libraries modify their runtime bytecode at the time of deployment to guard against regular calls. Same restrictions as with `.creationCode` also apply here.
-
-For an interface type `I` the following is available:
-- `type(I).interfaceId`: bytes4 value containing EIP-165 interface identifier of a given interface I. The identifier is defind as the XOR of all function selectors defined within the interface itself, excluding inherited functions.
+For an `interface` type `I` the following is available:
+1. `type(I).interfaceId`: `bytes4` value containing EIP-165 interface identifier of a given `interface I`.
+    - The identifier is defined as the `XOR` of all function selectors defined within the interface itself, excluding inherited functions.
 
 #### 84. Integer type information
 
 For an integer type T, the following is available:
-1. `type(T).min`: smallest value representable by type T
-2. `type(T).max`: largest value representable by type T
+1. `type(T).min`: smallest value possible
+2. `type(T).max`: largest value possible
 
 ### 85. Control structures
 
 Solidity has `if`, `else`, `while`, `do`, `for`, `break`, `continue`, `return` with usual semantics known for C or Javascript.
 
-1. Parentheses can not be ommitted for conditionals, but curly braces can be ommitted around single-statement bodies
-2. Note that there is no type conversion from non-boolean to boolean types as there is in C and JavaScript, so `if (1){...}` is not valid in Solidity.
+1. Parentheses `(..)`can **not** be *ommitted* for conditionals, but curly braces `{...}` may be *ommitted* around *single-statement bodies*
+2. There is **no type conversion** from non-boolean to `bool` types as there is in C and JavaScript, so `if (1){...}` is **not valid** in Solidity
