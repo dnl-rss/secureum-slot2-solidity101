@@ -8,7 +8,6 @@ Soldity is a high-level language for implementing smart contracts on Ethereum an
 
 ```solidity
 // SPDX-License-Identifier: MIT
-// compiler version must be greater than or equal to 0.8.3 and less than 0.9.0
 pragma solidity ^0.8.3;
 
 contract HelloWorld {
@@ -18,11 +17,21 @@ contract HelloWorld {
 
 ### 2. Solidity influences
 
-Solidity was influenced by C++ (OOP & Syntax), Python (modifiers, multiple inheritance, C3 linearization, & super keywords), and JavaScript (function level scoping & `var` keyword). Javascript influences have been reduced since `v0.4.0`
+Solidity was influenced by:
+- C++ (OOP & Syntax)
+- Python (modifiers, multiple inheritance, C3 linearization, & super keywords)
+- JavaScript (function level scoping & `var` keyword)
+
+Javascript influences have been reduced since `v0.4.0`
+
+Solidity is the most widely used smart contract language, thus it is critical for understanding contract security.
 
 ### 3. General features
 
-Solidity is statically typed, supports inheritance, libraries, and complex user-defined types. It is a fully-featured high level language.
+Solidity is:
+- A "curly bracket" language: curly brackets `{}` are used to group statements within a scoping
+- object oriented (supports inheritance, libraries, and user-defined types)
+- statically typed
 
 ### Sub-Chapters
 

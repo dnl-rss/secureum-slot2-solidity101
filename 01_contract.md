@@ -1,30 +1,41 @@
 ## 13. Contracts
 
-Contracts are similar to classes in OOP languages: they contain persistent data in state variables, functions that can modifiy these variables, and contracts can inherit from other contracts.
+Smart contracts are fundamental to Ethereum's utility.
+
+Contracts are similar to classes in OOP languages:
+- store persistent data in state variables
+- define functions that can modify these variables
+- contracts can inherit from and interact with other contracts
 
 ## 14. Declarations Within Contracts
 
 Contracts contain declarations of:
+- custom data types: `struct` and `enum`
 - state variables
-- functions
-- function modifiers
 - events
 - errors
-- struct types
-- enum types
+- function modifiers
+- constructor function
+- functions
+
+Contracts may be declared as a `contract`, `library`, or `interface`
 
 ### 15. State Variables
 
-State Variables are permanently stored in contract storage and can be accessed by all functions of a contract.
+*State variables* are permanently stored in contract `storage`.
+
+They can be accessed and/or modified by the functions of a contract.
+
+They persist between transactions which may or may not modify the contract state.
 
 #### 16. State Visibility Specifiers
 
-Visibility of state variables is either:
+The *visibility* of a state variable determines where its value can be read.
 1. `public`: accessible internally or via messages; A getter function is generated.
 2. `internal`: only accessible from the contract they are defined in, or contracts deriving from it.
 3. `private`: only accessible from the contract they are defined in.
 
-> Note: Marking a variable as private does not prevent others from reading the data stored on the EVM. It only prevents other contracts from programatically reading it.
+> Note: Marking a variable as private does not prevent others from reading the data stored on the EVM. It only prevents other contracts reading it.
 
 #### 17. State Mutability
 
@@ -44,21 +55,21 @@ The compiler does not reserve a storage slot for these variables.
 
 #### 18. Gas Cost of State Variables
 
-Compared to regular state variables, the gas cost of `constant` and `immutable` variables are much lower.
-
-For constant variables, the expression assigned to it is copied to all places where it is accessed in the code and it is re-evaluated each time. This allows for local optimization.
-
-Immutable variables are evaluated once at construction time and their value is copied to all places where it is accessed in the code. 32 bytes are reserved for these values, even if they would fit in fewer bytes. Due to this, constant variables are sometimes cheaper than immutables ones.
+Compared to regular state variables, the gas costs of `constant` and `immutable` variables are much lower.
+- For `constant` variables, the expression assigned to it is copied to all places where it is accessed in the code and it is re-evaluated each time. This allows for local optimization.
+- `Immutable` variables are evaluated once at construction time and their value is copied to all places where it is accessed in the code. 32 bytes are reserved for these values, even if they would fit in fewer bytes. Due to this, constant variables are sometimes cheaper than immutables ones.
 
 The only supported types for immutable variables are strings and value types. Only strings for constants.
 
 ### 19. Functions
 
-Functions are executable units of code typically defined inside a contract, but can also be defined outside of one. They have different levels of visibility toward other contracts.
+Functions are *executable units of code* typically defined *inside a contract*, but can also be defined outside of one.
+
+They have different levels of *visibility* toward other contracts.
 
 #### 20. Function parameters
 
-Function `parameters` are declared the same way as variables, and the name of unused parameters can be omitted. Function parameters can be used as any other local variable, and can be reassigned.
+Function `parameters` are declared the same way as *variables*, and the name of unused parameters can be omitted. Function parameters can be used as any other local variable, and can be reassigned.
 
 #### 21. Function return variables
 

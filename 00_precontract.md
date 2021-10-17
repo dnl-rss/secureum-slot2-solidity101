@@ -1,6 +1,8 @@
 ### 4. Layout of a solidity file
 
-A solidity source file can contain an arbitrary number of pragma directions, import directives, and struct/enum/contract definitions.
+The layout of a solidity source file is important for readability.
+
+A solidity file can contain an arbitrary number of `pragma`/`import` directives and `struct`/`enum`/`contract` definitions.
 
 Best practices is to declare within contracts in this order:
 - state variables
@@ -13,7 +15,9 @@ However, a few items must be addressed before any contract is declared:
 
 ### 5. SPDX License Identifier
 
->Solidity files should start with a comment indicating the license. The compiler includes the supplied string in bytecode metadata.
+SPDX = Software Package Data Exchange.
+
+> Solidity files should start with a comment indicating the SPDX license. The compiler includes the supplied string in bytecode metadata.
 
 ```solidity
 // SPDX-License-Identifier:MIT
@@ -34,18 +38,20 @@ The `pragma` keyword enables certain compiler features or checks. This directive
 
 The version `pragma` does not change the solidity compiler, nor does it enable or disable features of the compiler. It instructs the compiler to check whether its version matches the one required by the pragma, or throw an error.
 
-> This statement requires that the file be compiled with a specific version:
+> This statement requires that the file be compiled with only version 0.8.7:
 
 ```solidity
-pragma solidity x.y.z;
+pragma solidity 0.8.7;
 ```
 
-The latest compiler versions are in the `0.8.z` range. A different `y` in `x.y.z` indicates a breaking change in the compiler version, whereas a different `z` indicates bug fixes.
+The latest compiler versions are in the `0.8.z` range.
 
-> A carrot prefix indicates that the file must be compiled with *at least* version `x.y.z`, until the next `y` version:
+A different `y` in `x.y.z` indicates a breaking change in the compiler version, whereas a different `z` indicates bug fixes.
+
+> A carrot prefix indicates that the file must be compiled with *at least* version 0.8.7, until the next major version (0.9.0):
 
 ```solidity
-pragma solidity ^x.y.z;
+pragma solidity ^0.8.7;
 ```
 
 > Complex pragmas combine multiple versions:
@@ -53,6 +59,8 @@ pragma solidity ^x.y.z;
 ```solidity
 pragma solidity >=0.8.0<0.8.3;
 ```
+
+The solidity compiler version introduces various optimizations and security features, thus it is critical for evaluating security.
 
 #### 8. ABI Coder pragmas
 
@@ -70,13 +78,14 @@ pragma abicoder v1;
 pragma abicoder v2;
 ```
 
-The new `abicoder v2` is enabled by default. It can encode and decode arbitrarily nested arrays and structs, although this may produce suboptimal code and is not as robustly tested as the v1 encoder.
+The new `abicoder v2` is enabled by default as a superset of `v1`
+-`v2` can encode and decode arbitrarily nested arrays and structs, although this may produce suboptimal code and is not as robustly tested as the v1 encoder.
+-`v2` contracts can interact freely with `v1` or `v2` contracts.
+-`v1` contracts will throw an error when decoding types only supported by `v2`. Upgrading the abicoder version will resolve the issue.
 
-An `abicoder v2` contract can interact freely with `abicoder v1` or `v2` contracts.
-
-An `abicoder v1` contract will throw an error if it attempts to decode types only supported by the new compiler. Upgrading the abicoder version will resolve the issue.
-
-This `pragma` applies to all code in the file, regardless of where the code ends up. A contract compiled with abicoder v1 can still contain code using the new encoder by inheriting from another contract. This is okay as long as the new types are used internally and not in external fucntion signatures.
+This `pragma` applies to all code in the file, regardless of where the code ends up.
+- A contract compiled with abicoder `v1` can still contain code using the new encoder by inheriting from another contract.
+- This is okay as long as the new types are used internally and not in external function signatures.
 
 #### 9. Experimental pragmas
 
@@ -89,7 +98,7 @@ pragma experimental SMTChecker;
 ```
 
 `SMTChecker` performs additional safety checks which are obtained by querying an SMT solver, and provide examples where the checks are violated:
-- Satisfies all require and assert statements
+- Satisfies all `require()` and `assert()` statements
 - Arithmetic underflow and overflow
 - Division by zero
 - Trivial condition and unreachable
@@ -115,18 +124,27 @@ Code comments improve readability and maintainability by providing in-line docum
 // a single line comment
 
 /*
-A
-multi-
-line
+A multi-line
 comment
 */
 ```
 
 ### 12. Natspec Comments
 
-Ethereum Natural Language Speficication Format (NatSpec) comments generate JSON format metadata for developers and end users. All public interfaces should be fully annotated
+Ethereum Natural Language Specification Format (NatSpec) comments generate JSON format metadata for developers and end users. All public interfaces should be fully annotated
 
-> Both single line NatSpec comments (///) and multi-line comments (/**...*/) are supported, though only single line comments are shown below:
+NatSpec tags include:
+- `@title`
+- `@author`
+- `@notice`
+- `@dev`
+- `@param`
+- `@return`
+- `@custom`
+
+Both single line NatSpec comments (///) and multi-line comments (/**...*/) are supported
+
+> NatSpec comments are used heavily in the contract below
 
 ```solidity
 // SPDX-License-Identifier: GPL-3.0
