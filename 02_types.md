@@ -1,16 +1,22 @@
 ## 35. Static Typing
 
-Solidity is a statically typed language, meaning that the type of each variable must be specified at compile-time. Other examples include C, C++, Java, Rust, Go, and Scala.
+Solidity is a *statically typed language*, meaning that the *type* of each variable must be *specified explicitly* at *compile-time*.
 
-In contrast, dynamically typed languages only require types on runtime values.
+Other statically typed languages include C, C++, Java, Rust, Go, and Scala.
+
+In contrast, *dynamically typed languages* can assign types during runtime.
 
 ## 36. Value and Reference Types
 
 Solidity has two categories of types: `value` types and `reference` types.  
 
+`value` types are called so because variables of these types will always be passed by value (they are copied when used as function arguments or in assignments).
+
+`reference` types assign a pointer to a value in memory. They can be accessed and modified through multiple names, yet reference the same underlying variable.
+
 ### 37. Value Types
 
-`value` types are called so because variables of these types will always be passed by value (they are copied when used as function arguments or in assignments).
+Value types can be considered safer because their value can only be modified through direct reference, but their persistence should be considerd
 
 > Includes:
 
@@ -29,7 +35,7 @@ Solidity has two categories of types: `value` types and `reference` types.
 
 ### 38. Reference Types
 
-`reference` types assign a pointer to a value in memory. They can be accessed and modified through multiple names, yet reference the same underlying variable.
+Reference types may be risky because their value may be changed via multiple variable names.
 
 > Includes:
 
@@ -41,7 +47,7 @@ Solidity has two categories of types: `value` types and `reference` types.
 
 ## 39. Default Values
 
-A declared variable will have an initial default value whose byte representation is all zeros. This is typically the "zero state" of whatever the type is.
+A *declared variable* that is *not yet initialized* will have a *default zero-state value* whose byte representation is all zeros.
 
 > Default values:
 
@@ -49,16 +55,19 @@ A declared variable will have an initial default value whose byte representation
 | --------- | ------------- |
 | `bool` | `false` |
 | `int` or `uint`| `0` |
-| `string` or `bytes` | `""` |
+| `string` | `""` |
+| `bytes` | `[]` |
 | `enum` | first member |
 
 ## 40. Scoping
 
-Scoping in solidity follows the widespread scoping rules of C99
+The *scope* of a variable affects its visibility within contracts and functions.
 
-1. Variables are visible from the point right after declaration until the closure of the smallest bracket set `{}` that contains that declaration. An exeception to this rule includes variables declared in the initialization part of a for-loop, which are only visible until the end of the for-loop
-2. Variables that are parameter-like (function parameters, modifier parameters, catch parameters, ...) are visible inside the code block that follows -- the body of the function or modifier or catch blocks
-3. Variables and other items declared outside of a code block are visible even before they were declared. This means you can use state variables and call functions before they are declared in code.
+Solidity follows the widespread scoping rules of the *C99 standard*:
+1. Variables are visible from the point *right after declaration* until the *closure of the smallest bracket set* `{}` that contains that declaration.
+    - An *exception* to this rule includes variables declared in the *initialization part of a for-loop*, which are only visible until the end of the for-loop
+2. Variables that are *parameter-like* (function parameters, modifier parameters, catch parameters, ...) are visible *inside the code block that follows* -- the body of the function or modifier or catch blocks
+3. Variables and other *items declared outside of a code block* are visible *before they were even declared*. This means state variables and functions can be called before they are declared in code.
 
 ```solidity
 // global_var is visible here (before declaration), and everywhere else in this code
