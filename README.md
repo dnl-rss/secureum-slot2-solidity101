@@ -26,7 +26,7 @@ Solidity is statically typed, supports inheritance, libraries, and complex user-
 
 ### Sub-Chapters
 
-1. [Precontract Elements](./00.precontract.md)
+1. [Precontract Elements](./00_precontract.md)
 1. [Contract Elements](./01_contract.md)
 2. [Typing](./02_types.md)
 3. [Exceptions](./03_exceptions.md)
