@@ -78,10 +78,10 @@ pragma abicoder v1;
 pragma abicoder v2;
 ```
 
-The new `abicoder v2` is enabled by default as a superset of `v1`
--`v2` can encode and decode arbitrarily nested arrays and structs, although this may produce suboptimal code and is not as robustly tested as the v1 encoder.
--`v2` contracts can interact freely with `v1` or `v2` contracts.
--`v1` contracts will throw an error when decoding types only supported by `v2`. Upgrading the abicoder version will resolve the issue.
+The new `abicoder v2` is enabled by default as a superset of `v1`:
+- `v2` can encode and decode arbitrarily nested arrays and structs, although this may produce suboptimal code and is not as robustly tested as the v1 encoder.
+- `v2` contracts can interact freely with `v1` or `v2` contracts.
+- `v1` contracts will throw an error when decoding types only supported by `v2`. Upgrading the abicoder version will resolve the issue.
 
 This `pragma` applies to all code in the file, regardless of where the code ends up.
 - A contract compiled with abicoder `v1` can still contain code using the new encoder by inheriting from another contract.
