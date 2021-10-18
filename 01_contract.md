@@ -50,14 +50,15 @@ Variables are mutable by default, but immutable types `constant` or `immutable` 
 | Types       | `string` or `values` | only `values` |
 | Size        | variable             | 32 bytes |
 | Cannot      | access storage or blockchain data | be read during construction |
+| Compiler copies | the expession | the value |
 
 The compiler does not reserve a storage slot for these variables.
 
 #### 18. Gas Cost of State Variables
 
 Compared to regular state variables, the gas costs of `constant` and `immutable` variables are much lower.
-- For `constant` variables, the expression assigned to it is copied to all places where it is accessed in the code and it is re-evaluated each time. This allows for local optimization.
-- `Immutable` variables are evaluated once at construction time and their value is copied to all places where it is accessed in the code. 32 bytes are reserved for these values, even if they would fit in fewer bytes. Due to this, constant variables are sometimes cheaper than immutables ones.
+- For `constant` variables, the assigned *expression is copied* to all places where it is accessed in the code and it is *evaluated multiple times*. This allows for local optimization.
+- For `immutable` variables, the assigned *expression is evaluated once* at construction time and its *value is copied* to all places where it is accessed in the code. 32 bytes are reserved for these values, even if they would fit in fewer bytes. Due to this, constant variables are sometimes cheaper than immutables ones.
 
 The only supported types for immutable variables are strings and value types. Only strings for constants.
 
