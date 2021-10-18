@@ -76,7 +76,11 @@ Function parameters can be used as any other local variable, and can be reassign
 
 #### 21. Function return variables
 
-Function *return* variables are declared with the same syntax after the `returns` keyword. Names of return variables can be omitted. Return variables can be used as any other local variable. They are initialized with their default value and retain that value until they are reassigned. A function with return values must receive those in a return statement and assignment.
+Function *return* variables are declared with the same syntax after the `returns` keyword. Names of return variables can be omitted. 
+
+Return variables can be used as any other local variable. They are initialized with their default value and retain that value until they are reassigned. 
+
+A function with return values must receive those in a return statement and assignment.
 
 > This example shows a simple function with two input parameters and one return variable. Note that in older version of solidity, this function would be subject to arithmatic overflow.
 
@@ -96,9 +100,9 @@ function addTwoNumbers(uint256 param1, uint256 param2) returns (uint256 returnVa
 
 #### 22. Function modifiers
 
-Function `modifiers` can be used to control the behavior of a function prior to execution.  
+A function `modifier` can be used to control the behavior of a function prior to execution.  
 
-> This simplified version of Open Zepplin's [ownable](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/Ownable.sol) standard demonstrates the use of `onlyOwner()` modifier to restrict access to the function `transferOwnership()`
+> This simplified version of Open Zepplin's [ownable](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/Ownable.sol) standard demonstrates the use of `modifier onlyOwner` to restrict access to `function transferOwnership()`
 
 ```solidity
 contract Ownable {
@@ -126,11 +130,20 @@ The underscore `_;` symbol can appear in a modifier multiple times, each occurre
 
 #### 23. Function visibility
 
-The `visibility` of a contract is either:
+The *visibility* of a contract is either:
 1. `public`: included in contract interface and can be called internally or via messages
 2. `external`: included in contract interface but *cannot* be called internally
 3. `internal`: *not* included in contract interface; only called internally or from derived contracts
 4. `private`: only called internally.
+
+> The visibility of a contract determines how it can be called:
+
+| | current contract | derived contracts | interface messages |
+|-|-|-|-|
+| `public`   | ✅ | ✅ | ✅ |
+| `external` | ⬜️ | ⬜️ | ✅ |
+| `internal` | ✅ | ✅ | ⬜️ |
+| `private`  | ✅ | ⬜️ | ⬜️ |
 
 Free functions always have `internal` visibility, their code is included in all contracts that call them, similar to internal library functions
 
