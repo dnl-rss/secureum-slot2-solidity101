@@ -49,7 +49,7 @@ Variables are mutable by default, but immutable types `constant` or `immutable` 
 | Assigned    | at declaration       |                    |
 | Types       | `string` or `values` | only `values` |
 | Size        | variable             | 32 bytes |
-| Cannot      | access storage or blockchain data | cannot be read during construction |
+| Cannot      | access storage or blockchain data | be read during construction |
 
 The compiler does not reserve a storage slot for these variables.
 
