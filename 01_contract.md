@@ -149,7 +149,10 @@ Free functions always have `internal` visibility, their code is included in all 
 
 #### 24. Function mutability
 
-The `mutability` of a function can restrict read and write access to the contract state. Modify restrictions are enforced at the EVM level via `STATICCALL` opcodes, but read restrictions are only enforced by the solidity compiler. Additionally, functions are restricted by default in their ability to send Ether; such functions must be marked `payable`.
+The *mutability* of a function can *restrict read and write* access to the contract state. 
+- *Write restrictions* are enforced at the EVM level via `STATICCALL` opcodes 
+- *Read restrictions* are only enforced by the solidity compiler 
+- Functions are restricted by default in their *ability to send/receive Ether*; such functions must be marked `payable`.
 
 > Solidity mutability types and privileges:
 
@@ -160,28 +163,34 @@ The `mutability` of a function can restrict read and write access to the contrac
 | `view`      | ✅   | ⬜️     | ⬜️ |
 | `pure`      | ⬜️   | ⬜️     | ⬜️ |
 
+`pure` functions can neither read nor write to the contract state. 
+
 Operations considered to modify the contract state include:
-- Writing to state Variables
+- Writing to state variables
 - Emitting events
 - Creating other contracts
-- `SELFDESTRUCT`
+- Calling `SELFDESTRUCT`
 - Sending Ether via calls
-- Calling any function not marked view or pure
+- Calling any function not marked `view` or `pure`
 - Using low-level calls
 - Using inline assembly containing certain opcodes
 
 Operations considered to read contract state include:
 - Reading from state variables
-- Accessing `address(this).balance` or `<address>.balance`
-- Accessing any of the members of a block, tx, or msg (excluding msg.sig and msg.data)
-- Calling any function not marked pure
+- Accessing `address(this).balance` or another `<address>.balance`
+- Accessing any of the members of a `block`, `tx`, or `msg` (excluding `msg.sig` and `msg.data`)
+- Calling any function not marked `pure`
 - Using inline assembly that contains certain opcodes
 
 #### 25. Function overloading
 
-A contract can have multiple functions of the same name but with different parameter types, this is called "overloading." Overloaded functions are selected by matching the function declarations in the current scope to the arguments supplied in the function call. Return parameters are not taken into account.
+A contract can have multiple functions of the same name but with different parameter types, this is called "overloading." 
 
-> This overloaded function `getSum()` can either be called with two integer parameters, `getSum(1,2)` returns 3, or with three integers, `getSum(1,2,3)` returns 6 `
+Overloaded functions are selected by matching the function *call arguments* to the *declaration arguments* in the current scope. 
+
+Return parameters are not taken into account.
+
+> This overloaded function `getSum()` can either be called with two or three integer parameters: `getSum(1,2)` or `getSum(1,2,3)`
 
 ```solidity
 // called if function receives two integer parameters
@@ -197,25 +206,29 @@ function getSum(uint a, uint b, uint c) public pure returns (uint) {
 
 #### 26. Free Functions
 
-Functions that are defined outside of contracts are called *free functions* and always have implicit internal visibility. Their code is include in all contracts that call them, similar to an internal library function.
+Functions that are defined outside of contracts are called *free functions* and always have implicit `internal` visibility. 
+
+Their code is included in all contracts that call them, similar to an internal library function.
 
 ### 27. Events
 
-`Events` are an abstraction of the EVM's logging functionality. Emitting events causes the arguments to be stored in the transaction's log -- a special data structure in the blockchain. These logs are associated with the contract `address` and are accessible on the blockchain as long as the block is accessible.
+*Events* are an abstraction of the EVM's logging functionality. Emitting events causes the arguments to be stored in the transaction's log -- a special data structure in the blockchain. 
 
-The `Log` and its `event` data is not accessible from within contracts (even those that create them). Applications can subscribe and listen to the events through the RPC interface of an Ethereum client.
+These logs are associated with the contract `address` and are accessible on the blockchain as long as the block is accessible.
+
+The log and its `event` data is not accessible from within contracts (even those that create them). Applications can subscribe and listen to the events through the RPC interface of an Ethereum client.
 
 ### 28. Indexed event parameters
 
-The optional attribute `indexed` for up two three event parameters adds them to a special data structure known as "topics" instead of the data part of the log.
+The optional attribute `indexed` for up to three `event` parameters adds them to a special data structure known as "topics" instead of the data part of the log.
 
-Using arrays (string and bytes) as indexed arguments results in the keccak-256 hash stored as a topic instead of the array itself. This is because topics can only hold a single word (32 bytes).
+Using arrays (string and bytes) as indexed arguments results in the `keccak256` hash stored as a topic instead of the array itself. This is because topics can only hold a single word (32 bytes).
 
 All parameters without the `indexed` attribute are ABI-encoded into the `data` part of the log.
 
 Topics allow you to search for events, i.e. filtering a sequence of blocks for certain events.
 
-> Emitting an `event` in our `Ownable` allows applications to listen for events showing that ownership of the contract was changed. Because the event parameters are `indexed`, an application could more efficiently query the blockchain log for transfers to or from a specific address.
+> Because the event parameters are `indexed`, an application can more efficiently listen for a  `transferOwnership` event to or from a specific `address`:
 
 ```solidity
 contract Ownable {
@@ -260,11 +273,17 @@ contract EtherBank {
 
 ### 30. Struct Types
 
-`struct` types group several variables into a custom data structure. Struct members are access using a period `.`,
+`struct` types group several variables into a custom data structure. 
+
+Struct members are access using a period `.`,
 
 ### 31. Enum Types
 
-`enum` types create custom types with a finit set of constant values to improve readability. They may take a minimum of 1 member and a maximum of 256 members. They can be explicitly converted to/from integers. Options are represented by unsigned integer values starting from 0. Default value is the first member
+`enum` types create custom types with a finite set of constant values to improve readability. 
+- May take a minimum of 1 member and a maximum of 256 members. 
+- Explicitly convertible to/from integers. 
+- Options are represented by unsigned integer values starting from 0. 
+- Default value is the first member
 
 > An `enum` object restricting types of fruit to `APPLE`, `BANANA`, or `PEACH`
 
@@ -316,25 +335,35 @@ contract FruitShopping {
 
 ### 32. Constructor function
 
-Contract creation can be triggered by an external transaction or from within a solidity contract. When a contract is created, its `constructor()` function is executed. A constructor is optional, and only one is allowed.
+*Contract creation* can be triggered by an *external transaction* or from *within a solidity contract*. 
 
-After the constructor has executed, the final code of the contract is stored on the blockchain. This code includes all public and external functions and all functions that are reachable from there through function calls.
+When a contract is created, its `constructor()` function is executed. A constructor is optional, and only one is allowed.
 
-The deployed code does not include the constrcutor code or internal functions that are only called from the constructor.
+After the constructor has executed, the final code of the contract is stored on the blockchain. This code includes all `public` and `external` functions and all functions that are reachable from there through function calls.
+
+The deployed code does **not** include the *constructor code* or *internal functions* that are only called from the constructor.
 
 ### 33. Receive Function
 
-A contract may have at most one `receive()` function, which is declared without the function keyword. This function takes no arguments, does not return anything, must have `external` visibility, and is `payable`.
+A contract may have at most one `receive()` function, which is declared without the function keyword. 
+
+This function takes no arguments, does not return anything, must have `external` visibility, and is `payable`.
 
 ```Solidity
 receive() external payable {}
 ```
 
-`receive()` executes on calls to a contract with empty calldata. This function is executed on plain Ether transfers via `.send()` or `.transfer()`. Both `.send()` and `.transfer()` only forward `2300 gas` to `receive()`, allowing `receive()` to update the `address.balance` and leaving little room for other operations in the function body.
+`receive()` executes on calls to a contract with empty calldata. 
+
+This function is executed on plain Ether transfers via `.send()` or `.transfer()`. 
+
+Both `.send()` and `.transfer()` only forward `2300 gas` to `receive()`, allowing `receive()` to update the `address.balance` and leaving little room for other operations in the function body.
 
 ### 35. Fallback function
 
-A contract can have at most one `fallback()` function, which is declared without the function keyword. This function must have external visibility. It may or may not be payable.
+A contract can have at most one `fallback()` function, which is declared without the function keyword. 
+
+This function must have `external` visibility. It is *optionally* `payable`.
 
 ```solidity
 fallback() external payable {}
