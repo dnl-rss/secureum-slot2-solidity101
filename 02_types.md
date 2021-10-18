@@ -101,13 +101,25 @@ Operations on booleans:
 - `==`: equality
 - `!=`: inequality
 
-The operators || and && apply the common short-circuiting rules. This means that in the expression f(x) || g(y), if f(x) evaluates to true, g(y) will not be evaluated even if it may have side-effects.
+The operators ``||`` and ``&&`` apply the common *short-circuiting* rules: the second condition is not evaluated if the first is `false`.
 
-TODO: ^explain
+Booleans are often used to control the logic of a contract. Proper usage is essential to security.
+
+> Accidental use of logical negation in this modifier mean that restricted functions will be callable by virtually anyone except the rightful owner
+
+```solidity
+modifier onlyOwner {
+    require( msg.sender != owner );
+    _;
+}
+```
 
 ### 42. Integer Types
 
-Signed and unsigned integers of various sizes. Keywords `uint8` to `uint256` in steps of 8 (unsigned of 8 up to 256 bits) and int8 to int256. uint and int are aliases for uint256 and int256, respectively.
+*Signed and unsigned integers* may be specified in various fixed sizes.
+- Keywords `uint8` to `uint256` specify *unsigned integers* in steps of 8 bits
+- Keywords `int8` to `int256` specify *signed integers*
+- `uint` and `int` are aliases for `uint256` and `int256`, respectively.
 
 Operators on integers:
 - `<=`, `<`, `==`, `!=`, `>=`, `>`: comparisons, evaluate to `bool`
@@ -131,7 +143,11 @@ TODO: table for uint
 
 ### 43. Check and Unchecked Arithmetic
 
-Arithmetic on integers is performed in "checked" mode by default since `v0.8.0`. This integrates Open Zepplin's [SafeMath](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/math/SafeMath.sol) standard into arithmatic operations and will revert transactions that cause integer values to overflow or underflow. The "unchecked" mode can be used via `unchecked{ ... }.`
+If an arithmetic operation causes the value of a fixed size integer to go above or below its possible range, this results in an *overflow* or *underflow* error, respectively.
+
+Arithmetic on integers is performed in "checked" mode by default since `v0.8.0`. This integrates Open Zepplin's [SafeMath](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/math/SafeMath.sol) standard into arithmetic operations and will revert transactions that cause integer values to overflow or underflow.
+
+The "unchecked" mode can be used via `unchecked{ ... }`. Operations resulting in overflow or underflow will "wrap" around to the upper or lower bound of that variable.
 
 ### 44. Fixed Point Types
 
@@ -139,11 +155,13 @@ Fixed point numbers using keywords `fixed` / `ufixed` are not fully supported by
 
 ### 45. Address Types
 
-The address type comes in two flavors:
-1. `address`: holds a 20-byte value for an Ethereum address
-2. `address payable`: same as `address`, with additional members `.transfer()` and `.send()`
+The `address` type is a *20 byte value* refers to an Ethereum account address
 
-You can only send Ether to an `address payable`, but `address` can be converted via `payable(address)`.
+`address` comes in two flavors:
+1. `address`: cannot receive Ether
+2. `address payable`: can receive Ether (additional members `.transfer()` and `.send()`)
+
+`address` can be converted to `address payable` via `payable(address)`.
 
 - `<=`, `<`, `==`, `!=`, `>=`, `>`: comparisons, evaluate to `bool`
 
@@ -176,11 +194,13 @@ The are three methods available to send Ether within a contract: `transfer()`, `
 
 Note that `transfer()` and `send()` are both processed in the `receive()` function of the recipient account. If not is defined, they are processed in `fallback()`.
 
-Both `transfer()` and `send()` forward limited amounts of gas. This is just enough to update `address.balance` of the recipient account, but any additional execution in `receive()` will cause the transfer to fail.
+Both `transfer()` and `send()` forward only 2300 gas. This is just enough to update `address.balance` of the recipient account, but any additional execution in `receive()` will cause the transfer to fail.
+
+`send()` does not revert the transaction, but returns false. Use `require()` to check the success condition and revert if needed.
 
 While `transfer()` and `send()` were favored in the past because they are resistant to *reentrancy attacks*, `call{value:}()` is now the favored method and the developer must implement other safeguards against reentrancy.
 
-TODO: Why was this recommendation made? What shortcomings of tranfer() and send() surfaced the change?
+TODO: Why was this recommendation made? What shortcomings of transfer() and send() surfaced the change?
 
 > This implmentation of a smart contract bank can send ether by either `send()`, `transfer()`, or `call{value:}("")`. Note that this contract is vulnerable to reentracy via the call method.
 
@@ -229,7 +249,7 @@ contract Bank {
 }
 ```
 
-### 49. Call, Delegatecall, and STATICCALL
+### 49. call, delegatecall, and staticcall
 
 The low-level address methods `call()`, `delegatecall()`, and `staticcall()` can be used to interface with contracts that do not adhere to the ABI or gain more control over the encoding.
 
@@ -239,11 +259,13 @@ Modifiers for `gas` and `value` are used to specify the amount of gas and Ether 
 
 The purpose of `delegatecall()` is to use library or logic code stored in the callee contract, but to operate on the state of the caller contract.
 
-| | gas modifier | value modifier | reverts if |
-|-|-|-|-|
-| `call()` | ✅ | ✅ | none |
-| `delegatecall()` | ✅ | ⬜️ | none |
-| `staticcall()` | ✅ | ✅ | called function modifies state |
+| | gas modifier | value modifier | reverts if | use case |
+|-|-|-|-|-|
+| `call()` | ✅ | ✅ | none ||
+| `delegatecall()` | ✅ | ⬜️ | none | state/modify |
+| `staticcall()` | ✅ | ✅ | called function modifies state | state/use |
+
+> TODO: Revise this section
 
 ### 50. Contract Type
 
@@ -266,16 +288,22 @@ address(this).balance
 
 Values of types `bytes1`, `bytes2`, ... `bytes32` hold a sequence of bytes from 1 up to 32.  
 
-The type `byte[]` is an array of bytes, but wastes 31 bytes of space fore each element due to padding rules (except in storage). It is recommended to use `bytes` instead.
+The type `byte[]` is an array of bytes, but wastes 31 bytes of space fore each element due to padding rules (except in storage).
+
+It is recommended to use `bytes` instead.
 
 ### 52. literals
 
 Literals can be of 5 types:
-1. Address literals: hexadecimal literals between 39-41 digits that pass the address checksum test. values that do not pass the checksum test produce an error.
-2. Rational and integer literals: integer literals are formed from a sequence of numbers in the range 0-9. Decimal fraction literals are formed by a `.` with at least one number on one side. Scientific notation is supported, where the base can have fractions and the exponent cannot. Underscores can be used to separate digits for readability.
-3. String literals: written with either double or single quotes (`"foo"` or `'bar'`). Only contain printable ASCII characters and a set of escape characters.
-4. Unicode literals: Unicode literals prefixed with the keyword `unicode` can contain any valid UTF-8 sequence. They also upport the same escape sequences as string literals.
-5. Hexadecimal literals: hexadecimal digits prefixed with keyword `hex` enclosed by double or single quotes.
+1. Address literals: *hexadecimal literals* between 39-41 digits that pass the *address checksum test*. values that do not pass the checksum test produce an error.
+2. Rational and integer literals:
+    - *Integer literals* are formed from a *sequence of digits* in the range 0-9.
+    - *Decimal literals* are formed by a `.` with at least one number on one side.
+    - *Scientific notation* is supported, where the base can have fractions and the exponent cannot.
+    - *Underscores* can be used to separate digits for readability.
+3. String literals: *ASCII characters* written with either double or single quotes (`"foo"` or `'bar'`). May also contain a set of escape characters.
+4. Unicode literals: *UTF8 characters* prefixed with the keyword `unicode`. They also support the same escape sequences as string literals.
+5. Hexadecimal literals: *hexadecimal digits* prefixed with keyword `hex` enclosed by double or single quotes.
 
 ```solidity
 address myAddress = 0xE7A54673f2FfE41cf38dbA2014326064A958b709; // an address literal
@@ -292,7 +320,7 @@ string myHex = hex'00_11_22_FF' // hex literal with underscores and single quote
 
 ### 53. Enum Types
 
-Enums are a user defined solidity type. They must have between 1-256 members. The default value is the first member
+Enums are a *user defined type*. They must have *between 1-256 members*. The *default value* is the *first member*.
 
 ```solidity
 enum Fruits { APPLE, BANANA, PEACH }; // enum fruit restricting types of fruits
@@ -300,7 +328,10 @@ enum Fruits { APPLE, BANANA, PEACH }; // enum fruit restricting types of fruits
 
 ### 54. Function Types
 
-Function types are the types for functions. Variables of function type can be assigned from functions. Function parameters of `function` type can be used to pass functions into another function call. Return variables may be of `function` type.
+Function types are the types for functions.
+- Variables of `function` type can be assigned from functions.
+- Function parameters of `function` type can be used to pass functions into another function call.
+- Return variables may be of `function` type.
 
 Functions come in two types: internal and external. Internal functions can be called inside the current contract. External functions consist of an address and a function signature. They can be passed via and returned from external function calls.
 
@@ -354,18 +385,20 @@ contract OracleUser {
 
 Reference type refer to a value by pointing to its location in the EVM, so every reference type must have an additional annotation for the data location.  There are three data locations: `memory`, `storage`, and `calldata`
 
-1. `memory`: lifetime limited to external function call
-2. `storage`: lifetime limited to contract lifetime and location of state variables
-3. `calldata`: non-modifiable, non-persistent area where function arguments are stored. behaves life memory. required for parameters of external functions but can be used for other variables.
+1. `memory`: lifetime limited to *external function call*
+2. `storage`: lifetime limited to *contract lifetime* and location of state variables
+3. `calldata`: lifetime limited to *call lifetime*. non-modifiable, non-persistent area where function arguments are stored. behaves like memory. required for parameters of external functions but can be used for other variables.
 
 ### 56. Data Location & Assignement
 
 Data location are relevant for both the *persistence of data* and *semantics of assignments*.
 
-1. Assignments between `storage` and `memory` (or from `calldata`) always create an independent copy.
-2. Assignments from `memory` to `memory` only create references. This means that changes to one `memory` variable are also visible in all other memory variables that refer to the same data.
-3. Assignments from `storage` to a local storage variable also only assign a reference.
-4. All other assignments to `storage` always copy. Examples include assignments to state variables or to members of local variables of storage `struct` type, even if the local variable itself is just a reference.
+Assignments of variables behave differently depending on their data location:
+1. Assignments between `storage` and `memory` (or from `calldata`) always create an *independent copy*.
+2. Assignments from `memory` to `memory` create *references*.
+3. Assignments from `storage` to `storage` create *references*.
+4. All other assignments to `storage` always *copy*.
+    - Examples include assignments to state variables or to members of local variables of storage `struct` type, even if the local variable itself is just a reference.
 
 ```solidity
 contract Example {
@@ -470,7 +503,9 @@ contract Example {
 }
 ```
 
-### 59. Variables of type `bytes` and `string` are special arrays
+### 59. Bytes & String
+
+Variables of type `bytes` and `string` are special arrays
 
 1. `bytes` is similar to `byte[]`, but it is packed tightly in `calldata` and `memory`
 2. `string` is equal to `bytes`, but does not allow length or index access
@@ -509,7 +544,7 @@ contract Example {
 
 Memory arrays with dynamic length can be created using the `new` operator
 
-1. Unlike `storage` arrays, `memory` arrays cannot be resized. It does not have a `.push()` member function.
+1. Unlike `storage` arrays, `memory` arrays cannot be resized. It does not have a `push()` member function.
 2. The required sized must be known in advance, or a new `memory` array must be created with every element copied.
 
 ```Solidity
