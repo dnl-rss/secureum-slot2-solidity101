@@ -70,11 +70,13 @@ They have different levels of *visibility* toward other contracts.
 
 #### 20. Function parameters
 
-Function `parameters` are declared the same way as *variables*, and the name of unused parameters can be omitted. Function parameters can be used as any other local variable, and can be reassigned.
+Function *parameters* are declared the same way as *variables*, and the name of unused parameters can be omitted. 
+
+Function parameters can be used as any other local variable, and can be reassigned.
 
 #### 21. Function return variables
 
-Function `return` variables are declared with the same syntax after the `returns` keyword. Names of return variables can be omitted. Return variables can be used as any other local variable. They are initialized with their default value and retain that value until they are reassigned. A function with return values must receive those in a return statement and assignment.
+Function *return* variables are declared with the same syntax after the `returns` keyword. Names of return variables can be omitted. Return variables can be used as any other local variable. They are initialized with their default value and retain that value until they are reassigned. A function with return values must receive those in a return statement and assignment.
 
 > This example shows a simple function with two input parameters and one return variable. Note that in older version of solidity, this function would be subject to arithmatic overflow.
 
