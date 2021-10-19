@@ -8,15 +8,15 @@ In contrast, *dynamically typed languages* can assign types during runtime.
 
 ## 36. Value and Reference Types
 
-Solidity has two categories of types: `value` types and `reference` types.  
+Solidity has two categories of types: value and reference  
 
-`value` types are called so because variables of these types will always be passed by value (they are copied when used as function arguments or in assignments).
+*Value* type variables are always be *passed by value* (they are copied when used as function arguments or in assignments).
 
-`reference` types assign a pointer to a value in memory. They can be accessed and modified through multiple names, yet reference the same underlying variable.
+*Reference* types *assign a pointer* to a value in `memory`. They can be accessed and modified through multiple names, yet reference the same underlying variable.
 
 ### 37. Value Types
 
-Value types can be considered safer because their value can only be modified through direct reference, but their persistence should be considerd
+Value types can be considered *safer* because their value can only be modified through direct reference, but their persistence should be considered
 
 > Includes:
 
@@ -92,7 +92,7 @@ function scopingDemo(uint param1) {
 
 ## 41. Boolean Type
 
-Declared with `bool` keyowrd. Possible values are constrants `true` and `false`
+Declared with `bool` keyword. Possible values are `true` and `false`
 
 Operations on booleans:
 - `!`: logical negation
@@ -125,7 +125,7 @@ Operators on integers:
 - `<=`, `<`, `==`, `!=`, `>=`, `>`: comparisons, evaluate to `bool`
 - `&`, `|`, `^`, `~`: bit operators
 - `<<`, `>>`: shift operators
-- `+`, `-`, `*`, `/`, `%`, **: arithmatic operators
+- `+`, `-`, `*`, `/`, `%`, `**`: arithmetic operators
 
 Todo: explain bitwise exclusive or, bitwise negation, left shift, right shift, unary -
 
@@ -133,15 +133,15 @@ Integers are restricted to the range of their declared byte sized, which ranges 
 
 | type     | lower bound | upper bound   |
 | -------- | ----------- | ------------- |
-| `int8`   | 0           | (2**8) - 1    |      
-| `int16`  | 0           | (2**16) - 1   |   
-| `int24`  | 0           | (2**24) - 1   |
+| `uint8`   | 0           | (2**8) - 1    |      
+| `uint16`  | 0           | (2**16) - 1   |   
+| `uint24`  | 0           | (2**24) - 1   |
 | ...      | ...         | ...           |
-| `int256` | 0           | (2**256) - 1  |
+| `uint256` | 0           | (2**256) - 1  |
 
-TODO: table for uint
+TODO: table for int
 
-### 43. Check and Unchecked Arithmetic
+### 43. Checked and Unchecked Arithmetic
 
 If an arithmetic operation causes the value of a fixed size integer to go above or below its possible range, this results in an *overflow* or *underflow* error, respectively.
 
@@ -155,7 +155,7 @@ Fixed point numbers using keywords `fixed` / `ufixed` are not fully supported by
 
 ### 45. Address Types
 
-The `address` type is a *20 byte value* refers to an Ethereum account address
+The `address` type is a *20 byte value* refers to an Ethereum account address cointaining several useful members.
 
 `address` comes in two flavors:
 1. `address`: cannot receive Ether
@@ -389,14 +389,14 @@ Reference type refer to a value by pointing to its location in the EVM, so every
 2. `storage`: lifetime limited to *contract lifetime* and location of state variables
 3. `calldata`: lifetime limited to *call lifetime*. non-modifiable, non-persistent area where function arguments are stored. behaves like memory. required for parameters of external functions but can be used for other variables.
 
-### 56. Data Location & Assignement
+### 56. Data Location & Assignment
 
-Data location are relevant for both the *persistence of data* and *semantics of assignments*.
+Data locations are relevant for both the *persistence of data* and *semantics of assignments*.
 
 Assignments of variables behave differently depending on their data location:
-1. Assignments between `storage` and `memory` (or from `calldata`) always create an *independent copy*.
-2. Assignments from `memory` to `memory` create *references*.
-3. Assignments from `storage` to `storage` create *references*.
+1. `storage` <--> `memory` (or from `calldata`) always create an *independent copy*.
+2. `memory` --> `memory` create *references*.
+3. `storage` --> `storage` create *references*.
 4. All other assignments to `storage` always *copy*.
     - Examples include assignments to state variables or to members of local variables of storage `struct` type, even if the local variable itself is just a reference.
 
@@ -468,7 +468,7 @@ contract Example {
 ### 58. Array members
 
 1. `length`: returns number of elements in array
-2. `push`: appends a zero-initialized element at the end of the array. returns a reference to the element.
+2. `push()`: appends a zero-initialized element at the end of the array. returns a reference to the element.
 3. `push(x)`: appends a given element at the end of the array. returns nothing.
 4. `pop()`: remove element from the end of the array. implicitly calls delete on the removed element. returns the element.
 
@@ -507,8 +507,8 @@ contract Example {
 
 Variables of type `bytes` and `string` are special arrays
 
-1. `bytes` is similar to `byte[]`, but it is packed tightly in `calldata` and `memory`
-2. `string` is equal to `bytes`, but does not allow length or index access
+1. `bytes` is similar to `byte[]`, but it is *packed tightly* in `calldata` and `memory`
+2. `string` is equal to `bytes`, but has no *length* or *index* access
 3. Solidity does not have sting manipulation functions, but there are third party string libraries
 4. Use `bytes` for arbitrary length raw byte data and `string` for arbitrary length UTF8 string data
 5. Use `bytes` over `byte[]` because it is cheaper. byte[] adds 32 padding bytes between the elements
@@ -614,12 +614,9 @@ contract Example {
 ### 62. Array gas costs
 
 Storage arrays have operations `push()` and `pop()`.
-
-*Extending* the array with `push()` has *constant gas cost* because storage is zero initialized.
-
-*Shortening* the array by `pop()` have *variable gas cost*, depending on the size of the element being removed.
-
-If the removed element is an array, `pop()` can be very costly, because it includes explicitly clearing all the removed elements.
+- *Extending* the array with `push()` has *constant gas cost* because storage is zero initialized.
+- *Shortening* the array by `pop()` have *variable gas cost*, depending on the size of the element being removed.
+- `pop()` can be very costly, because it includes explicitly clearing all the removed elements.
 
 > Pushing an empty element has constant gas cost. Popping an element have variable gas cost, depending on the size of the element:  
 
@@ -780,6 +777,7 @@ For example:
 A literal number can take a suffix of `wei`, `gwei`, or `ether` to specify a *sub-denomination of Ether*, effectively multiplying the value by the appropriate power of 10.
 
 > 1 ether == 1e9 qwei == 1e18 wei
+
 ```solidity
 uint amount1 = 1 ether;
 uint amount2 = 1e9 gwei;
