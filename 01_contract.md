@@ -1,12 +1,62 @@
 ## 13. Contracts
 
-Smart contracts are fundamental to Ethereum's utility.
+Smart contracts are fundamental to Ethereum's utility as a **smart contract platform**.
 
-Contracts are similar to classes in OOP languages:
-- store persistent data in state variables
-- define functions that can modify these variables
-- contracts can inherit from and interact with other contracts
+Contracts are similar to *classes* in object-oriented programming:
+- *store persistent data* in state variables
+- *define functions* that may modify these variables
+- can *inherit from* and *interact with* other contracts
 
+> State variables, functions, and contract inheritance/interactions are demonstrated by the contracts below:
+
+```solidity
+// SPDX-License-Identifier:any string representing the license
+pragma solidity 0.8.7;
+
+contract CounterContract {
+
+    // store persistent data in state variables
+    uint internal counter;
+
+    // define functions that maay modify state variables
+    function incrementCounter() internal {
+        counter += 1;
+    }  
+}
+
+// can inherit from other contracts
+contract MaxCapacity is CounterContract {
+
+    uint maxCapacity;
+
+    constructor(uint capacity) {
+        maxCapacity = capacity;
+    }
+
+    function safeIncrement() public {
+        require ( counter < maxCapacity , "Cannot exceed capacity!");    
+        incrementCounter();
+    }
+
+    function getCounter() public view returns (uint) {
+        return counter;
+    }
+}
+
+// can interact with ather contracts
+contract Caller {
+
+    MaxCapacity contract_instance = new MaxCapacity(3);
+
+    function callSafeIncrement() public {
+        contract_instance.safeIncrement();
+    }
+
+    function getCounter() public view returns (uint) {
+        return contract_instance.getCounter();
+    }
+}
+```
 ## 14. Declarations Within Contracts
 
 Contracts contain declarations of:
@@ -70,15 +120,15 @@ They have different levels of *visibility* toward other contracts.
 
 #### 20. Function parameters
 
-Function *parameters* are declared the same way as *variables*, and the name of unused parameters can be omitted. 
+Function *parameters* are declared the same way as *variables*, and the name of unused parameters can be omitted.
 
 Function parameters can be used as any other local variable, and can be reassigned.
 
 #### 21. Function return variables
 
-Function *return* variables are declared with the same syntax after the `returns` keyword. Names of return variables can be omitted. 
+Function *return* variables are declared with the same syntax after the `returns` keyword. Names of return variables can be omitted.
 
-Return variables can be used as any other local variable. They are initialized with their default value and retain that value until they are reassigned. 
+Return variables can be used as any other local variable. They are initialized with their default value and retain that value until they are reassigned.
 
 A function with return values must receive those in a return statement and assignment.
 
@@ -149,9 +199,9 @@ Free functions always have `internal` visibility, their code is included in all 
 
 #### 24. Function mutability
 
-The *mutability* of a function can *restrict read and write* access to the contract state. 
-- *Write restrictions* are enforced at the EVM level via `STATICCALL` opcodes 
-- *Read restrictions* are only enforced by the solidity compiler 
+The *mutability* of a function can *restrict read and write* access to the contract state.
+- *Write restrictions* are enforced at the EVM level via `STATICCALL` opcodes
+- *Read restrictions* are only enforced by the solidity compiler
 - Functions are restricted by default in their *ability to send/receive Ether*; such functions must be marked `payable`.
 
 > Solidity mutability types and privileges:
@@ -163,7 +213,7 @@ The *mutability* of a function can *restrict read and write* access to the contr
 | `view`      | ✅   | ⬜️     | ⬜️ |
 | `pure`      | ⬜️   | ⬜️     | ⬜️ |
 
-`pure` functions can neither read nor write to the contract state. 
+`pure` functions can neither read nor write to the contract state.
 
 Operations considered to modify the contract state include:
 - Writing to state variables
@@ -184,9 +234,9 @@ Operations considered to read contract state include:
 
 #### 25. Function overloading
 
-A contract can have multiple functions of the same name but with different parameter types, this is called "overloading." 
+A contract can have multiple functions of the same name but with different parameter types, this is called "overloading."
 
-Overloaded functions are selected by matching the function *call arguments* to the *declaration arguments* in the current scope. 
+Overloaded functions are selected by matching the function *call arguments* to the *declaration arguments* in the current scope.
 
 Return parameters are not taken into account.
 
@@ -206,13 +256,13 @@ function getSum(uint a, uint b, uint c) public pure returns (uint) {
 
 #### 26. Free Functions
 
-Functions that are defined outside of contracts are called *free functions* and always have implicit `internal` visibility. 
+Functions that are defined outside of contracts are called *free functions* and always have implicit `internal` visibility.
 
 Their code is included in all contracts that call them, similar to an internal library function.
 
 ### 27. Events
 
-*Events* are an abstraction of the EVM's logging functionality. Emitting events causes the arguments to be stored in the transaction's log -- a special data structure in the blockchain. 
+*Events* are an abstraction of the EVM's logging functionality. Emitting events causes the arguments to be stored in the transaction's log -- a special data structure in the blockchain.
 
 These logs are associated with the contract `address` and are accessible on the blockchain as long as the block is accessible.
 
@@ -273,16 +323,16 @@ contract EtherBank {
 
 ### 30. Struct Types
 
-`struct` types group several variables into a custom data structure. 
+`struct` types group several variables into a custom data structure.
 
 Struct members are access using a period `.`,
 
 ### 31. Enum Types
 
-`enum` types create custom types with a finite set of constant values to improve readability. 
-- May take a minimum of 1 member and a maximum of 256 members. 
-- Explicitly convertible to/from integers. 
-- Options are represented by unsigned integer values starting from 0. 
+`enum` types create custom types with a finite set of constant values to improve readability.
+- May take a minimum of 1 member and a maximum of 256 members.
+- Explicitly convertible to/from integers.
+- Options are represented by unsigned integer values starting from 0.
 - Default value is the first member
 
 > An `enum` object restricting types of fruit to `APPLE`, `BANANA`, or `PEACH`
@@ -335,7 +385,7 @@ contract FruitShopping {
 
 ### 32. Constructor function
 
-*Contract creation* can be triggered by an *external transaction* or from *within a solidity contract*. 
+*Contract creation* can be triggered by an *external transaction* or from *within a solidity contract*.
 
 When a contract is created, its `constructor()` function is executed. A constructor is optional, and only one is allowed.
 
@@ -345,7 +395,7 @@ The deployed code does **not** include the *constructor code* or *internal funct
 
 ### 33. Receive Function
 
-A contract may have at most one `receive()` function, which is declared without the function keyword. 
+A contract may have at most one `receive()` function, which is declared without the function keyword.
 
 This function takes no arguments, does not return anything, must have `external` visibility, and is `payable`.
 
@@ -353,15 +403,15 @@ This function takes no arguments, does not return anything, must have `external`
 receive() external payable {}
 ```
 
-`receive()` executes on calls to a contract with empty calldata. 
+`receive()` executes on calls to a contract with empty calldata.
 
-This function is executed on plain Ether transfers via `.send()` or `.transfer()`. 
+This function is executed on plain Ether transfers via `.send()` or `.transfer()`.
 
 Both `.send()` and `.transfer()` only forward `2300 gas` to `receive()`, allowing `receive()` to update the `address.balance` and leaving little room for other operations in the function body.
 
 ### 35. Fallback function
 
-A contract can have at most one `fallback()` function, which is declared without the function keyword. 
+A contract can have at most one `fallback()` function, which is declared without the function keyword.
 
 This function must have `external` visibility. It is *optionally* `payable`.
 
