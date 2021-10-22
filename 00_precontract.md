@@ -1,52 +1,114 @@
-### 4. Layout of a solidity file
+### 4. Solidity File Layout
 
-The layout of a solidity source file is important for readability.
+The *layout* of a solidity source file is important for *readability*.
 
-A solidity file can contain an arbitrary number of `pragma`/`import` directives and `struct`/`enum`/`contract` definitions.
+A solidity file can contain an *arbitrary number* of `pragma`/`import` directives and `struct`/`enum`/`contract` definitions.
 
-Best practices is to declare within contracts in this order:
+The best practice is to declare *elements within contracts* in this order:
 - state variables
 - events
 - modifiers
 - constructor
 - functions
 
-However, a few items must be addressed before any contract is declared:
+> A simple contract demonstrates the ordering of contract elements suggested above
+
+```solidity
+// SPDX-License-Identifier:MIT
+pragma solidity 0.8.7;
+
+contract OwnableContract {
+
+    // state variables
+    address owner;
+
+    // events
+    event TransferredOwnership(address newOwner);
+
+    // modifiers
+    modifier onlyOwner() {
+        require( msg.sender == owner, "Caller is not the owner" );
+        _;
+    }
+
+    // constructor
+    constructor() {
+        owner = msg.sender;
+    }
+
+    // functions
+    function transferOwnership(address newOwner) public onlyOwner {
+        owner = newOwner;
+        emit TransferredOwnership(newOwner);
+    }
+}
+```
+
+Note the few lines **before** the `contract` declaration. These are also critical elements of a Solidity source file.
 
 ### 5. SPDX License Identifier
 
-SPDX = Software Package Data Exchange.
+Solidity files should start with a *comment* indicating the **SPDX** (Software Package Data Exchange) license.
+- The compiler will include the supplied string in the *bytecode metadata*
+- It does **not validate** that the string is a valid [SPDX](https://spdx.org/licenses/) string
 
-> Solidity files should start with a comment indicating the SPDX license. The compiler includes the supplied string in bytecode metadata.
+> Compile the example `OwnableContract` above in [Remix IDE](https://remix.ethereum.org/#optimize=false&runs=200&evmVersion=null&version=soljson-v0.8.7+commit.e28d00a7.js), and note the SPDX line
 
 ```solidity
 // SPDX-License-Identifier:MIT
 ```
+
+> Examine `artifacts/ContractName_metadata.json` of the `contracts` directory to find the SPDX string `MIT`
+
+```json
+{
+  "sources": {
+    "contracts/OwnableContract.sol": {
+      "keccak256": "0xc893d79b67c7ff1bbf602f425f3664aaeea280b202fae68ceb00258809d1a79f",
+      "license": "MIT",
+      "urls": [
+        "bzz-raw://374a24f341ef6f0c92adbf46a27e515ee0cb675001e5698c9293ca9916a68b03",
+        "dweb:/ipfs/QmTuVZffu8a22akPm8fuCbL334hVkfpqpsBVxg2dCuB2BC"
+      ]
+    }
+  }
+}  
+```
+
+Try compiling the example `OwnableContract` above in [Remix IDE](https://remix.ethereum.org/#optimize=false&runs=200&evmVersion=null&version=soljson-v0.8.7+commit.e28d00a7.js), then find the SPDX string `MIT` in the metadata file.
+
 ### 6. Pragmas
 
-The `pragma` keyword enables certain compiler features or checks. This directive is local to a source file, and does not apply to imports.
+The `pragma` keyword enables certain compiler features or checks.
 
-> There are two types of pragmas:
+This directive is *local to a source file*, and *does **not** apply to imports*.
 
-1. Version Pragma:
+> There are two main categories of pragmas:
+
+1. **Version** Pragma:
   - Compiler Version
   - ABI Coder Version
-2. Experimental Pragma:
+2. **Experimental** Pragma:
   - SMT Checker
 
 #### 7. Version Pragmas
 
-The version `pragma` does not change the solidity compiler, nor does it enable or disable features of the compiler. It instructs the compiler to check whether its version matches the one required by the pragma, or throw an error.
+The **version** `pragma` instructs the compiler to check whether its version matches the one required, or throw an `Error`.
 
-> This statement requires that the file be compiled with only version 0.8.7:
+It does **not**:
+- change the compiler
+- enable or disable features of the compiler
+
+> This file must be compiled with **only** version `0.8.7`:
 
 ```solidity
 pragma solidity 0.8.7;
 ```
 
-The latest compiler versions are in the `0.8.z` range.
-
-A different `y` in `x.y.z` indicates a breaking change in the compiler version, whereas a different `z` indicates bug fixes.
+For version `x.y.z`:
+- while Solidity is still in early development, `x` is still `0`
+- *major changes* increment `y`, and introduce breaking changes over previous versions
+- *minor revisions* (bug-fixes) increment `z`
 
 > A carrot prefix indicates that the file must be compiled with *at least* version 0.8.7, until the next major version (0.9.0):
 
@@ -64,9 +126,7 @@ The solidity compiler version introduces various optimizations and security feat
 
 #### 8. ABI Coder pragmas
 
-The `abicoder` pragma indicates the choice between two implementations of the ABI encoder and decoder
-
-> Either
+The **abicoder** `pragma` indicates the choice between two implementations of the ABI encoder and decoder:
 
 ```solidity
 pragma abicoder v1;
@@ -78,20 +138,23 @@ pragma abicoder v1;
 pragma abicoder v2;
 ```
 
-The new `abicoder v2` is enabled by default as a superset of `v1`:
-- `v2` can encode and decode arbitrarily nested arrays and structs, although this may produce suboptimal code and is not as robustly tested as the v1 encoder.
-- `v2` contracts can interact freely with `v1` or `v2` contracts.
-- `v1` contracts will throw an error when decoding types only supported by `v2`. Upgrading the abicoder version will resolve the issue.
+The new `abicoder v2`
+- contains all the features of `v1`
+- is enabled by *default*
+- can encode and decode arbitrarily *nested arrays and structs*, although this may produce suboptimal code and is not as robustly tested as the `v1` encoder.
+- can interact freely with `v1` or `v2` contracts.
+
+`v1` contracts will throw an `Error` when decoding types only supported by `v2` (nested arrays and structs). Upgrading to `abicoder v2` will resolve the issue.
 
 This `pragma` applies to all code in the file, regardless of where the code ends up.
-- A contract compiled with abicoder `v1` can still contain code using the new encoder by inheriting from another contract.
-- This is okay as long as the new types are used internally and not in external function signatures.
+- A contract compiled with `abicoder v1` may still contain code using the `v2` encoder by *inheriting* from another contract.
+- This is okay as long as the `v2` types are used internally and not in external function signatures.
 
 #### 9. Experimental pragmas
 
-This `pragma` enables experimental compiler features that are not robustly tested and not yet enabled by default.
+The **experimental** `pragma` enables compiler features that are *not robustly tested* and *not yet enabled by default*.
 
-> The only experimental pragma at the time of writing is that of a Satisfiability Modulo Theories (SMT) checker:
+> The Satisfiability Modulo Theories (SMT) checker is an experimental feature:
 
 ```solidity
 pragma experimental SMTChecker;
@@ -106,6 +169,8 @@ pragma experimental SMTChecker;
 - Out of bounds index access
 - Insufficient funds for transfer
 
+This module provides **formal verification** of contract security, and is important for an auditor.
+
 ### 10. Import statements
 
 Import statements help to modularize code and work similarly to JavaScript
@@ -116,9 +181,9 @@ import filename;
 
 ### 11. Comments
 
-Code comments improve readability and maintainability by providing in-line documentation of what contracts, functions , variables, expressions, control, and data flow are expected to do in the implementation.
+Code comments improve readability and maintainability by providing in-line documentation of what code is expected to do in the implementation.
 
-> Both single line comments (//) and multi-line comments (/*...*/) are supported
+> Both single line comments `//` and multi-line comments `/*...*/` are supported
 
 ```Solidity
 // a single line comment
@@ -131,7 +196,7 @@ comment
 
 ### 12. Natspec Comments
 
-Ethereum Natural Language Specification Format (NatSpec) comments generate JSON format metadata for developers and end users. All public interfaces should be fully annotated
+Ethereum **Natural Language Specification Format** (NatSpec) comments generate *JSON metadata* for developers and end users. All public interfaces should be fully annotated with NatSpec.
 
 NatSpec tags include:
 - `@title`
@@ -140,9 +205,10 @@ NatSpec tags include:
 - `@dev`
 - `@param`
 - `@return`
+- `@inheritdoc`
 - `@custom`
 
-Both single line NatSpec comments (///) and multi-line comments (/**...*/) are supported
+Both single line NatSpec comments `///` and multi-line comments `/**...*/` are supported
 
 > NatSpec comments are used heavily in the contract below
 
