@@ -1,6 +1,8 @@
 ### 86. Exceptions
 
-Solidity uses *state reverting execptions* to handle errors. Such an exception *undoes all changes made to the state* in the current call (and sub-calls), and *flags an error* to the caller.
+Solidity uses *state reverting execptions* to handle errors.
+
+Such an exception *undoes all changes made to the state* in the current call (and sub-calls), and flags an `Error` to the caller.
 
 1. Exceptions in a sub-call usually *bubble up* (the exception is rethrown in the calling function) automatically.
     - The exceptions to this rule are `send()` and low-level functions `call()`, `delegatecall()`, and `staticcall()`: they return `false` instead.

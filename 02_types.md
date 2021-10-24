@@ -70,19 +70,23 @@ Solidity follows the widespread scoping rules of the *C99 standard*:
 3. Variables and other *items declared outside of a code block* are visible *before they were even declared*. This means state variables and functions can be called before they are declared in code.
 
 ```solidity
-// global_var is visible here (before declaration), and everywhere else in this code
+// GLOBAL_AR is visible here (before declaration), and everywhere else in this code
+// function scopingDemo is visible here (before declaration)
 
-const global_var = 2;
+uint GLOBAL_VAR = 2;
 
 function scopingDemo(uint param1) {
+
   // param1 is visible starting here
 
-  local_var = 3;
+  uint local_var = 3;
+
   // local_var is visible starting here
 
   for (uint var = 0, var < 10, var++) {
-    // var is visible inside the for-loop
+    // var is visible inside the for-loop (exception to rule)
   }
+
   // var is no longer visible
 
 }
@@ -94,18 +98,23 @@ function scopingDemo(uint param1) {
 
 Declared with `bool` keyword. Possible values are `true` and `false`
 
-Operations on booleans:
-- `!`: logical negation
-- `&&`: logical conjunction
-- `||`: logical disjunction
-- `==`: equality
-- `!=`: inequality
+> Operations on booleans:
 
-The operators ``||`` and ``&&`` apply the common *short-circuiting* rules: the second condition is not evaluated if the first is `false`.
+| operator | operation |
+| - | - |
+| `!` | logical negation |
+| `&&` | logical conjunction |
+| `\|\|` | logical disjunction |
+| `==` | equality |
+| `!=`| inequality |
+
+The operators ``||`` and ``&&`` apply the common **short-circuiting rules**:
+- For `||` the second condition is not valuated if the first is `true`
+- For `&&` the second condition is not evaluated if the first is `false`.
 
 Booleans are often used to control the logic of a contract. Proper usage is essential to security.
 
-> Accidental use of logical negation in this modifier mean that restricted functions will be callable by virtually anyone except the rightful owner
+> Accidental use of logical negation in this modifier mean that restricted functions will be **callable by virtually anyone**, except the rightful owner:
 
 ```solidity
 modifier onlyOwner {
@@ -117,9 +126,9 @@ modifier onlyOwner {
 ### 42. Integer Types
 
 *Signed and unsigned integers* may be specified in various fixed sizes.
-- Keywords `uint8` to `uint256` specify *unsigned integers* in steps of 8 bits
-- Keywords `int8` to `int256` specify *signed integers*
-- `uint` and `int` are aliases for `uint256` and `int256`, respectively.
+- `uint8` to `uint256` specify **unsigned integers** in steps of 8 bits
+- `int8` to `int256` specify **signed integers**
+- `uint` and `int` are **aliases** for `uint256` and `int256`, respectively.
 
 Operators on integers:
 - `<=`, `<`, `==`, `!=`, `>=`, `>`: comparisons, evaluate to `bool`
@@ -127,7 +136,7 @@ Operators on integers:
 - `<<`, `>>`: shift operators
 - `+`, `-`, `*`, `/`, `%`, `**`: arithmetic operators
 
-Todo: explain bitwise exclusive or, bitwise negation, left shift, right shift, unary -
+> Todo: explain bitwise exclusive or, bitwise negation, left shift, right shift, unary -
 
 Integers are restricted to the range of their declared byte sized, which ranges from 8 to 256 in increments of 8 bytes.
 
@@ -139,19 +148,22 @@ Integers are restricted to the range of their declared byte sized, which ranges 
 | ...      | ...         | ...           |
 | `uint256` | 0           | (2**256) - 1  |
 
-TODO: table for int
+> TODO: table for int
 
 ### 43. Checked and Unchecked Arithmetic
 
-If an arithmetic operation causes the value of a fixed size integer to go above or below its possible range, this results in an *overflow* or *underflow* error, respectively.
+If an arithmetic operation causes the value of a fixed size integer to go above or below its possible range, this results in an **overflow** or **underflow error** respectively.
 
-Arithmetic on integers is performed in "checked" mode by default since `v0.8.0`. This integrates Open Zepplin's [SafeMath](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/math/SafeMath.sol) standard into arithmetic operations and will revert transactions that cause integer values to overflow or underflow.
-
-The "unchecked" mode can be used via `unchecked{ ... }`. Operations resulting in overflow or underflow will "wrap" around to the upper or lower bound of that variable.
+- Default since `version 0.8.0` is to **revert transactions** with arithmetic causing overflow or underflow
+- "unchecked" mode can be used via `unchecked{ ... }`, employing traditional wrapping to the upper or lower bound of that variable.
 
 ### 44. Fixed Point Types
 
-Fixed point numbers using keywords `fixed` / `ufixed` are not fully supported by Solidity yet. They can be declared, but cannot be assigned to or from. There are fixed-point libraries that are widely used for this such as DSMath, PRBMath, ABDKMath64x64 etc.
+Fixed point numbers using keywords `fixed` / `ufixed` are not fully supported by Solidity yet.
+
+They can be declared, but cannot be assigned to or from.
+
+There are fixed-point libraries that are widely used for this such as `DSMath`, `PRBMath`, `ABDKMath64x64`, etc.
 
 ### 45. Address Types
 
@@ -253,9 +265,13 @@ contract Bank {
 
 The low-level address methods `call()`, `delegatecall()`, and `staticcall()` can be used to interface with contracts that do not adhere to the ABI or gain more control over the encoding.
 
-Each method takes a single `bytes memory` message data parameter encoded with `abi.encode()`, `abi.encodePacked()`, `abi.encodeWithSelector`, or `abi.encodeWithSignature`. They return `(bool, bytes memory)`: a success condition and return data.
+Each method takes a single `bytes memory` message data parameter encoded with `abi.encode()`, `abi.encodePacked()`, `abi.encodeWithSelector`, or `abi.encodeWithSignature`.
 
-Modifiers for `gas` and `value` are used to specify the amount of gas and Ether passed to the callee. Note that `value` is not supported by `delegatecall()`.
+They return `(bool, bytes memory)`: a success condition and return data.
+
+Modifiers for `gas` and `value` are used to specify the amount of gas and Ether passed to the callee.
+
+`value` is not supported by `delegatecall()`.
 
 The purpose of `delegatecall()` is to use library or logic code stored in the callee contract, but to operate on the state of the caller contract.
 
@@ -269,7 +285,11 @@ The purpose of `delegatecall()` is to use library or logic code stored in the ca
 
 ### 50. Contract Type
 
-Every `contract` defines its own type. Contracts can be explicitly converted to `address` type. Contract types do not support any operators. The members of contract types are the external functions, including getter functions for any public state variables.
+Every `contract` defines its own custom type.
+
+- Contracts are explicitly converted to `address` type.
+- Contract types do not support any operators.
+- The members of contract types are the external functions, including getter functions for any public state variables.
 
 ```solidity
 // explicitly convert the current contract "this" to address type with "address()"
@@ -295,15 +315,17 @@ It is recommended to use `bytes` instead.
 ### 52. literals
 
 Literals can be of 5 types:
-1. Address literals: *hexadecimal literals* between 39-41 digits that pass the *address checksum test*. values that do not pass the checksum test produce an error.
-2. Rational and integer literals:
-    - *Integer literals* are formed from a *sequence of digits* in the range 0-9.
-    - *Decimal literals* are formed by a `.` with at least one number on one side.
-    - *Scientific notation* is supported, where the base can have fractions and the exponent cannot.
+1. **Address literals**: *hexadecimal literals* between 39-41 digits that pass the **address checksum test**. values that do not pass the checksum test produce an `Error`.
+2. **Rational and integer literals**:
+    - **Integer literals** are formed from a *sequence of digits* in the range 0-9.
+    - **Decimal literals** are formed by a `.` with at least one number on one side.
+    - **Scientific notation** is supported, where the base can have fractions and the exponent cannot.
     - *Underscores* can be used to separate digits for readability.
-3. String literals: *ASCII characters* written with either double or single quotes (`"foo"` or `'bar'`). May also contain a set of escape characters.
-4. Unicode literals: *UTF8 characters* prefixed with the keyword `unicode`. They also support the same escape sequences as string literals.
-5. Hexadecimal literals: *hexadecimal digits* prefixed with keyword `hex` enclosed by double or single quotes.
+3. **String literals**: *ASCII characters* written with either double or single quotes (`"foo"` or `'bar'`).
+    - May also contain a set of escape characters.
+4. **Unicode literals**: *UTF8 characters* prefixed with the keyword `unicode`.
+    - They also support the same escape sequences as string literals.
+5. **Hexadecimal literals**: *hexadecimal digits* prefixed with keyword `hex` enclosed by double or single quotes.
 
 ```solidity
 address myAddress = 0xE7A54673f2FfE41cf38dbA2014326064A958b709; // an address literal
@@ -862,6 +884,7 @@ The values of all members of `msg` (`msg.sender`,`msg.value`, etc) can change fo
 > Solidity supports multiple functions for encoding and decoding data with respect to the contract ABI.
 
 | member | return type | description |
+|-|-|-|
 | `abi.decode(bytes memory encodedData, (...))` | `(...)` | decodes given data, while the types are given in parentheses as second argument |
 | `abi.encode(...)` | `bytes memory` | encodes given arguments |
 | `abi.encodePacked(...)` | `bytes memory` | packed encoding of given arguments, can be ambiguous! |
