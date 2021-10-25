@@ -805,7 +805,7 @@ receive() external payable {}
 
 `receive()` may only rely on a 2300 gas stipend forwarded from `send()` and `transfer()`, which allows the function to update the `address.balance` and leaves little room for other operations in the function body.
 
-### 35. Fallback function
+### 34. Fallback function
 
 A contract can have at most one `fallback()` function, which is declared without the function keyword.
 
