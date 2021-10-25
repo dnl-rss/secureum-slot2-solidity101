@@ -214,7 +214,7 @@ While `transfer()` and `send()` were favored in the past because they are resist
 
 TODO: Why was this recommendation made? What shortcomings of transfer() and send() surfaced the change?
 
-> This implmentation of a smart contract bank can send ether by either `send()`, `transfer()`, or `call{value:}("")`. Note that this contract is vulnerable to reentracy via the call method.
+> This implementation of a smart contract bank can send ether by either `send()`, `transfer()`, or `call{value:}("")`. Note that this contract is vulnerable to reentracy via the call method.
 
 ```solidity
 //SPDX-License-Identifier: MIT
